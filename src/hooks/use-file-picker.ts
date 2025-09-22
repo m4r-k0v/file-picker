@@ -36,7 +36,25 @@ export function useFilePicker({ onResourceSelection }: UseFilePickerProps = {}) 
     nameFilter: searchQuery || undefined,
   });
 
-  const { data: indexedFileIds = [] } = useIndexedFiles();
+  const { data: indexedData = { resourceIds: [], indexedFolders: [] } } = useIndexedFiles();
+  const indexedFileIds = indexedData.resourceIds || [];
+  const indexedFolders = indexedData.indexedFolders || [];
+
+  // Helper function to check if an item is indexed (directly or through parent folder)
+  const isItemIndexed = useCallback((item: any) => {
+    // Check if the item itself is indexed
+    if (indexedFileIds.includes(item.id)) {
+      return true;
+    }
+    
+    // For files, check if they're in an indexed folder
+    // This is a simplified check - in a real app you'd need proper path matching
+    if (item.type === 'file' && item.parentId) {
+      return indexedFileIds.includes(item.parentId);
+    }
+    
+    return false;
+  }, [indexedFileIds]);
 
   // Filter and sort files
   const filteredFiles = useMemo(() => {
@@ -53,9 +71,9 @@ export function useFilePicker({ onResourceSelection }: UseFilePickerProps = {}) 
 
     // Apply indexed filter
     if (filters.indexedFilter === 'indexed') {
-      filtered = filtered.filter(item => indexedFileIds.includes(item.id));
+      filtered = filtered.filter(item => isItemIndexed(item));
     } else if (filters.indexedFilter === 'not-indexed') {
-      filtered = filtered.filter(item => !indexedFileIds.includes(item.id));
+      filtered = filtered.filter(item => !isItemIndexed(item));
     }
 
     // Apply client-side sorting
@@ -90,7 +108,7 @@ export function useFilePicker({ onResourceSelection }: UseFilePickerProps = {}) 
     });
 
     return filtered;
-  }, [filesData?.files, filters, indexedFileIds, sortField, sortDirection]);
+  }, [filesData?.files, filters, isItemIndexed, sortField, sortDirection]);
 
   // Navigation handlers - memoized to prevent unnecessary re-renders
   const handleNavigate = useCallback((folderId?: string, folderName?: string) => {
@@ -174,6 +192,7 @@ export function useFilePicker({ onResourceSelection }: UseFilePickerProps = {}) 
     // Data
     filteredFiles,
     indexedFileIds,
+    isItemIndexed, // Add the helper function
     isLoading,
     error,
     

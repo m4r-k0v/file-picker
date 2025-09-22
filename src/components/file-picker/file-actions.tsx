@@ -61,21 +61,23 @@ export function FileActions({ item, isIndexed, onLoadingStateChange }: FileActio
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="bg-white">
-          {item.type === 'file' && (
-            <DropdownMenuItem
-              onClick={handleIndex}
-              disabled={indexFileMutation.isPending || deIndexFileMutation.isPending}
-            >
-              {(indexFileMutation.isPending || deIndexFileMutation.isPending) ? (
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-              ) : isIndexed ? (
-                <DatabaseBackup className="w-4 h-4 mr-2" />
-              ) : (
-                <Database className="w-4 h-4 mr-2" />
-              )}
-              {isIndexed ? 'Remove from Index' : 'Add to Index'}
-            </DropdownMenuItem>
-          )}
+          {/* Index/De-index option for both files and folders */}
+          <DropdownMenuItem
+            onClick={handleIndex}
+            disabled={indexFileMutation.isPending || deIndexFileMutation.isPending}
+          >
+            {(indexFileMutation.isPending || deIndexFileMutation.isPending) ? (
+              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+            ) : isIndexed ? (
+              <DatabaseBackup className="w-4 h-4 mr-2" />
+            ) : (
+              <Database className="w-4 h-4 mr-2" />
+            )}
+            {isIndexed ? 
+              `Remove ${item.type === 'folder' ? 'Folder' : 'File'} from Index` : 
+              `Add ${item.type === 'folder' ? 'Folder' : 'File'} to Index`
+            }
+          </DropdownMenuItem>
 
           {/* Delete option */}
           <DropdownMenuItem

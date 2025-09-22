@@ -95,17 +95,29 @@ export function useIndexedFiles() {
       const kbId = stackAIClient.getKnowledgeBaseId();
       console.log('🔍 useIndexedFiles - Knowledge Base ID:', kbId);
       
-      if (!kbId) return [];
+      if (!kbId) return { resourceIds: [], indexedFolders: [] };
 
       try {
         const response = await stackAIClient.listKnowledgeBaseResources(kbId);
-        const resourceIds = response.data.map(r => r.resource_id);
+        const resources = response.data;
+        const resourceIds = resources.map(r => r.resource_id);
+        
+        // Separate folders from files for better filtering
+        const indexedFolders = resources
+          .filter(r => r.inode_type === 'directory')
+          .map(r => ({
+            id: r.resource_id,
+            path: r.inode_path.path
+          }));
+          
         console.log('🔍 useIndexedFiles - Found indexed resources:', resourceIds);
-        console.log('🔍 useIndexedFiles - Full response:', response.data);
-        return resourceIds;
+        console.log('🔍 useIndexedFiles - Found indexed folders:', indexedFolders);
+        console.log('🔍 useIndexedFiles - Full response:', resources);
+        
+        return { resourceIds, indexedFolders };
       } catch (error) {
         console.error('🔍 useIndexedFiles - Error:', error);
-        return [];
+        return { resourceIds: [], indexedFolders: [] };
       }
     },
     enabled: stackAIClient.isAuthenticated(),
@@ -150,12 +162,12 @@ export function useIndexFile() {
       }
 
       let knowledgeBaseId = stackAIClient.getKnowledgeBaseId();
-      console.log('📝 useIndexFile - Starting index for file:', fileId);
+      console.log('📝 useIndexFile - Starting index for resource:', fileId);
       console.log('📝 useIndexFile - Current KB ID:', knowledgeBaseId);
       
       // If no knowledge base exists, create one
       if (!knowledgeBaseId) {
-        console.log('📝 useIndexFile - Creating new KB for first file');
+        console.log('📝 useIndexFile - Creating new KB for first resource');
         const kb = await stackAIClient.createKnowledgeBase({
           connection_id: connectionId,
           connection_source_ids: [fileId],
@@ -178,14 +190,14 @@ export function useIndexFile() {
         console.log('📝 useIndexFile - New KB created:', knowledgeBaseId);
       } else {
         console.log('📝 useIndexFile - Adding to existing KB');
-        // Add file to existing knowledge base by creating a new KB with all current files + new file
-        // Note: Stack AI API doesn't support adding individual files to existing KB,
-        // so we need to recreate the KB with all files
+        // Add resource to existing knowledge base by creating a new KB with all current resources + new resource
+        // Note: Stack AI API doesn't support adding individual resources to existing KB,
+        // so we need to recreate the KB with all resources
         const currentKbResources = await stackAIClient.listKnowledgeBaseResources(knowledgeBaseId);
         const existingFileIds = currentKbResources.data.map(r => r.resource_id);
-        console.log('📝 useIndexFile - Existing files in KB:', existingFileIds);
+        console.log('📝 useIndexFile - Existing resources in KB:', existingFileIds);
         const allFileIds = [...existingFileIds, fileId];
-        console.log('📝 useIndexFile - All files for new KB:', allFileIds);
+        console.log('📝 useIndexFile - All resources for new KB:', allFileIds);
         
         const kb = await stackAIClient.createKnowledgeBase({
           connection_id: connectionId,
