@@ -9,7 +9,7 @@ type FileListProps = {
   isLoading: boolean;
   searchQuery: string;
   selectedFiles: Set<string>;
-  indexedFileIds: string[];
+  isItemIndexed: (item: DriveItem) => boolean;
   onFileSelect: (fileId: string, selected: boolean) => void;
   onNavigate: (folderId: string, folderName: string) => void;
 }
@@ -19,7 +19,7 @@ export function FileList({
   isLoading,
   searchQuery,
   selectedFiles,
-  indexedFileIds,
+  isItemIndexed,
   onFileSelect,
   onNavigate,
 }: FileListProps) {
@@ -56,7 +56,7 @@ export function FileList({
           isSelected={selectedFiles.has(item.id)}
           onSelect={(selected) => onFileSelect(item.id, selected)}
           onNavigate={item.type === 'folder' ? () => onNavigate(item.id, item.name) : undefined}
-          indexedFileIds={indexedFileIds}
+          isIndexed={isItemIndexed(item)}
         />
       ))}
     </div>

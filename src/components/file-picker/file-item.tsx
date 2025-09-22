@@ -10,16 +10,15 @@ type FileItemProps = {
   isSelected: boolean;
   onSelect: (selected: boolean) => void;
   onNavigate?: (folderId: string) => void;
-  indexedFileIds: string[];
+  isIndexed: boolean;
 }
 
 export function FileItem({
   item,
   onNavigate,
-  indexedFileIds,
+  isIndexed,
 }: FileItemProps) {
   const [isLoading, setIsLoading] = useState(false);
-  const isIndexed = indexedFileIds.includes(item.id);
 
   const handleItemClick = () => {
     if (item.type === 'folder' && onNavigate) {

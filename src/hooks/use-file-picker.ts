@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect, useCallback, useRef } from 'react';
 import { useFiles, useIndexedFiles } from '@/hooks/use-stackai-files';
-import { SortField, SortDirection, FilterConfig } from '@/types/api';
+import { SortField, SortDirection, FilterConfig, DriveItem } from '@/types/api';
 
 export type BreadcrumbItem = {
   id: string;
@@ -37,11 +37,11 @@ export function useFilePicker({ onResourceSelection }: UseFilePickerProps = {}) 
   });
 
   const { data: indexedData = { resourceIds: [], indexedFolders: [] } } = useIndexedFiles();
-  const indexedFileIds = indexedData.resourceIds || [];
-  const indexedFolders = indexedData.indexedFolders || [];
+  const indexedFileIds = useMemo(() => indexedData.resourceIds || [], [indexedData.resourceIds]);
+  const indexedFolders = useMemo(() => indexedData.indexedFolders || [], [indexedData.indexedFolders]);
 
   // Helper function to check if an item is indexed (directly or through parent folder)
-  const isItemIndexed = useCallback((item: any) => {
+  const isItemIndexed = useCallback((item: DriveItem) => {
     // Check if the item itself is indexed
     if (indexedFileIds.includes(item.id)) {
       return true;

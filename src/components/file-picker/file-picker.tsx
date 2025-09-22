@@ -30,6 +30,7 @@ export function FilePicker({
     // Data
     filteredFiles,
     indexedFileIds,
+    isItemIndexed,
     isLoading,
     error,
 
@@ -71,7 +72,7 @@ export function FilePicker({
           isLoading={isLoading}
           searchQuery={searchQuery}
           selectedFiles={selectedFiles}
-          indexedFileIds={indexedFileIds}
+          isItemIndexed={isItemIndexed}
           onFileSelect={handleFileSelect}
           onNavigate={handleNavigate}
         />
