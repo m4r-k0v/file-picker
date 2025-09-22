@@ -1,9 +1,9 @@
-import { 
-  MoreVertical, 
-  Trash2, 
-  Database, 
+import { useEffect } from 'react';
+import {
+  MoreVertical,
+  Trash2,
+  Database,
   DatabaseBackup,
-  ExternalLink,
   Loader2
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -19,9 +19,10 @@ import { useDeleteFile, useIndexFile, useDeIndexFile } from '@/hooks/use-stackai
 type FileActionsProps = {
   item: DriveItem;
   isIndexed: boolean;
+  onLoadingStateChange?: (isLoading: boolean) => void;
 }
 
-export function FileActions({ item, isIndexed }: FileActionsProps) {
+export function FileActions({ item, isIndexed, onLoadingStateChange }: FileActionsProps) {
   const deleteFileMutation = useDeleteFile();
   const indexFileMutation = useIndexFile();
   const deIndexFileMutation = useDeIndexFile();
@@ -38,37 +39,30 @@ export function FileActions({ item, isIndexed }: FileActionsProps) {
     }
   };
 
+  // Notify parent component about loading state changes
+  const isIndexing = indexFileMutation.isPending || deIndexFileMutation.isPending;
+  
+  useEffect(() => {
+    onLoadingStateChange?.(isIndexing);
+  }, [isIndexing, onLoadingStateChange]);
+
   return (
     <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-      {/* Show error state if any mutation failed */}
       {(deleteFileMutation.isError || indexFileMutation.isError || deIndexFileMutation.isError) && (
         <span className="text-xs text-destructive opacity-100">
           Error
         </span>
       )}
-      
-      {/* External link button */}
-      {item.webViewLink && (
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => window.open(item.webViewLink, '_blank')}
-        >
-          <ExternalLink className="w-4 h-4" />
-        </Button>
-      )}
 
-      {/* Dropdown menu */}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" size="sm">
             <MoreVertical className="w-4 h-4" />
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
-          {/* Index/De-index option for files only */}
+        <DropdownMenuContent align="end" className="bg-white">
           {item.type === 'file' && (
-            <DropdownMenuItem 
+            <DropdownMenuItem
               onClick={handleIndex}
               disabled={indexFileMutation.isPending || deIndexFileMutation.isPending}
             >
@@ -82,9 +76,9 @@ export function FileActions({ item, isIndexed }: FileActionsProps) {
               {isIndexed ? 'Remove from Index' : 'Add to Index'}
             </DropdownMenuItem>
           )}
-          
+
           {/* Delete option */}
-          <DropdownMenuItem 
+          <DropdownMenuItem
             onClick={handleDelete}
             disabled={deleteFileMutation.isPending}
             className="text-destructive"

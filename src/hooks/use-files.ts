@@ -2,21 +2,13 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '@/lib/api-client';
+import { fileKeys } from '@/lib/query-keys';
 import {
   ListFilesRequest,
   DeleteFileRequest,
   IndexFileRequest,
   DeIndexFileRequest,
 } from '@/types/api';
-
-// Query keys
-export const fileKeys = {
-  all: ['files'] as const,
-  lists: () => [...fileKeys.all, 'list'] as const,
-  list: (params: ListFilesRequest) => [...fileKeys.lists(), params] as const,
-  indexedFiles: (knowledgeBaseId?: string) => ['indexed-files', knowledgeBaseId] as const,
-  knowledgeBases: () => ['knowledge-bases'] as const,
-};
 
 // Custom hooks for file operations
 export function useFiles(params: ListFilesRequest = {}) {

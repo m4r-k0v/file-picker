@@ -12,7 +12,7 @@ export function useAuth() {
   const [knowledgeBaseId, setKnowledgeBaseId] = useState<string | undefined>();
   const router = useRouter();
   const queryClient = useQueryClient();
-  
+
   // Use refs to track previous values to prevent unnecessary updates
   const prevValues = useRef({
     isAuthenticated: false,
@@ -48,7 +48,7 @@ export function useAuth() {
     // Set up a periodic check for auth state changes
     // This handles localStorage changes from other tabs
     const interval = setInterval(updateAuthState, 1000);
-    
+
     return () => clearInterval(interval);
   }, [updateAuthState]); // Include updateAuthState as dependency
 
@@ -87,19 +87,19 @@ export function useAuth() {
     isAuthenticated,
     connectionId,
     knowledgeBaseId,
-    
+
     // Actions
     login: loginMutation.mutate,
     logout: logoutMutation.mutate,
-    
+
     // Loading states
     isLoggingIn: loginMutation.isPending,
     isLoggingOut: logoutMutation.isPending,
-    
+
     // Errors
     loginError: loginMutation.error,
     logoutError: logoutMutation.error,
-    
+
     // Utilities
     updateAuthState, // For manual state refresh if needed
   };
@@ -110,11 +110,13 @@ export function useAuthRedirect(redirectTo: 'dashboard' | 'login' = 'login') {
   const { isAuthenticated } = useAuth();
   const router = useRouter();
 
-  useEffect(() => {
-    if (redirectTo === 'dashboard' && isAuthenticated) {
-      router.push('/dashboard');
-    } else if (redirectTo === 'login' && !isAuthenticated) {
-      router.push('/');
-    }
-  }, [redirectTo, isAuthenticated, router]);
+// console.count('dasda')
+//
+//   useEffect(() => {
+//     if (redirectTo === 'dashboard' && isAuthenticated) {
+//       router.push('/dashboard');
+//     } else if (redirectTo === 'login' && !isAuthenticated) {
+//       router.push('/');
+//     }
+//   }, [redirectTo, isAuthenticated]);
 }

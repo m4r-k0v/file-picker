@@ -59,7 +59,7 @@ export function Toolbar({
             Sort by {sortField}
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
+        <DropdownMenuContent align="end" className="bg-white">
           <DropdownMenuItem onClick={() => handleSortFieldChange('name')}>
             Name {sortField === 'name' && (sortDirection === 'asc' ? '↑' : '↓')}
           </DropdownMenuItem>
@@ -83,7 +83,7 @@ export function Toolbar({
             Filter
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
+        <DropdownMenuContent align="end" className="bg-white">
           <DropdownMenuItem onClick={() => onFilterChange({ ...filters, typeFilter: 'all' })}>
             All Items {filters.typeFilter === 'all' && '✓'}
           </DropdownMenuItem>

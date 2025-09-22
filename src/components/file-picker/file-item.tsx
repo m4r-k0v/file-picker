@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { FileIcon } from './file-icon';
 import { FileInfo } from './file-info';
@@ -9,18 +10,15 @@ type FileItemProps = {
   isSelected: boolean;
   onSelect: (selected: boolean) => void;
   onNavigate?: (folderId: string) => void;
-  showCheckbox?: boolean;
   indexedFileIds: string[];
 }
 
 export function FileItem({
   item,
-  isSelected,
-  onSelect,
   onNavigate,
-  showCheckbox = false,
   indexedFileIds,
 }: FileItemProps) {
+  const [isLoading, setIsLoading] = useState(false);
   const isIndexed = indexedFileIds.includes(item.id);
 
   const handleItemClick = () => {
@@ -29,31 +27,25 @@ export function FileItem({
     }
   };
 
+  const handleLoadingStateChange = (loading: boolean) => {
+    setIsLoading(loading);
+  };
+
 
   return (
-    <div className="flex items-center gap-3 p-3 hover:bg-muted/50 rounded-lg group">
-      {/* Checkbox */}
-      {showCheckbox && (
-        <Checkbox
-          checked={isSelected}
-          onCheckedChange={onSelect}
-        />
-      )}
-
-      {/* File Icon */}
+    <div className={`flex items-center gap-3 p-3 hover:bg-blue-50 group transition-opacity ${isLoading ? 'opacity-50' : ''}`}>
       <FileIcon item={item} className="w-6 h-6 text-muted-foreground" />
 
-      {/* File Info */}
-      <FileInfo 
+      <FileInfo
         item={item}
         isIndexed={isIndexed}
         onClick={handleItemClick}
       />
 
-      {/* Actions */}
-      <FileActions 
+      <FileActions
         item={item}
         isIndexed={isIndexed}
+        onLoadingStateChange={handleLoadingStateChange}
       />
     </div>
   );

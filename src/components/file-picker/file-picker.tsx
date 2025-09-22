@@ -13,10 +13,10 @@ type FilePickerProps = {
   onShowKnowledgeBaseManager?: () => void;
 }
 
-export function FilePicker({ 
+export function FilePicker({
   onResourceSelection,
   showKnowledgeBaseButton = false,
-  onShowKnowledgeBaseManager 
+  onShowKnowledgeBaseManager
 }: FilePickerProps = {}) {
   const {
     // State
@@ -26,13 +26,13 @@ export function FilePicker({
     sortField,
     sortDirection,
     filters,
-    
+
     // Data
     filteredFiles,
     indexedFileIds,
     isLoading,
     error,
-    
+
     // Actions
     handleNavigate,
     handleBreadcrumbNavigate,
@@ -44,12 +44,12 @@ export function FilePicker({
     refetch,
   } = useFilePicker({ onResourceSelection });
 
-  if (error) {
-    return <ErrorState onRetry={refetch} />;
-  }
+  // if (error) {
+  //   return <ErrorState onRetry={refetch} />;
+  // }
 
   return (
-    <div className="border rounded-lg bg-background">
+    <div className="border border-gray-200 rounded-lg bg-white shadow-sm">
       <FilePickerHeader
         breadcrumbPath={breadcrumbPath}
         onBreadcrumbNavigate={handleBreadcrumbNavigate}

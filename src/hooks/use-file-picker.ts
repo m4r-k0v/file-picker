@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useCallback, useRef } from 'react';
 import { useFiles, useIndexedFiles } from '@/hooks/use-stackai-files';
 import { SortField, SortDirection, FilterConfig } from '@/types/api';
 
@@ -25,6 +25,10 @@ export function useFilePicker({ onResourceSelection }: UseFilePickerProps = {}) 
     typeFilter: 'all',
     indexedFilter: 'all',
   });
+
+  // Use ref to store the callback to avoid dependency issues
+  const onResourceSelectionRef = useRef(onResourceSelection);
+  onResourceSelectionRef.current = onResourceSelection;
 
   // API queries
   const { data: filesData, isLoading, error, refetch } = useFiles({
@@ -88,8 +92,8 @@ export function useFilePicker({ onResourceSelection }: UseFilePickerProps = {}) 
     return filtered;
   }, [filesData?.files, filters, indexedFileIds, sortField, sortDirection]);
 
-  // Navigation handlers
-  const handleNavigate = (folderId?: string, folderName?: string) => {
+  // Navigation handlers - memoized to prevent unnecessary re-renders
+  const handleNavigate = useCallback((folderId?: string, folderName?: string) => {
     if (folderId) {
       // Navigate into folder
       setBreadcrumbPath(prev => [...prev, { id: folderId, name: folderName || 'Unknown' }]);
@@ -99,26 +103,29 @@ export function useFilePicker({ onResourceSelection }: UseFilePickerProps = {}) 
     }
     setCurrentFolderId(folderId);
     setSelectedFiles(new Set());
-  };
+  }, []);
 
-  const handleBreadcrumbNavigate = (folderId?: string) => {
+  const handleBreadcrumbNavigate = useCallback((folderId?: string) => {
     if (!folderId) {
       // Navigate to root
       setBreadcrumbPath([]);
       setCurrentFolderId(undefined);
     } else {
       // Navigate to specific folder in breadcrumb
-      const folderIndex = breadcrumbPath.findIndex(item => item.id === folderId);
-      if (folderIndex >= 0) {
-        setBreadcrumbPath(breadcrumbPath.slice(0, folderIndex + 1));
-        setCurrentFolderId(folderId);
-      }
+      setBreadcrumbPath(prev => {
+        const folderIndex = prev.findIndex(item => item.id === folderId);
+        if (folderIndex >= 0) {
+          return prev.slice(0, folderIndex + 1);
+        }
+        return prev;
+      });
+      setCurrentFolderId(folderId);
     }
     setSelectedFiles(new Set());
-  };
+  }, []);
 
-  // Selection handlers
-  const handleFileSelect = (fileId: string, selected: boolean) => {
+  // Selection handlers - memoized to prevent unnecessary re-renders
+  const handleFileSelect = useCallback((fileId: string, selected: boolean) => {
     setSelectedFiles(prev => {
       const newSet = new Set(prev);
       if (selected) {
@@ -128,24 +135,31 @@ export function useFilePicker({ onResourceSelection }: UseFilePickerProps = {}) 
       }
       return newSet;
     });
-  };
+  }, []);
 
-  const clearSelection = () => {
+  const clearSelection = useCallback(() => {
     setSelectedFiles(new Set());
-  };
+  }, []);
 
-  // Sort handlers
-  const handleSortChange = (field: SortField, direction: SortDirection) => {
+  // Sort handlers - memoized to prevent unnecessary re-renders
+  const handleSortChange = useCallback((field: SortField, direction: SortDirection) => {
     setSortField(field);
     setSortDirection(direction);
-  };
+  }, []);
 
   // Notify parent component about selected resources
-  useEffect(() => {
-    if (onResourceSelection) {
-      onResourceSelection(Array.from(selectedFiles));
+  // Use useCallback to memoize the notification function
+  const notifyResourceSelection = useCallback((selectedIds: string[]) => {
+    if (onResourceSelectionRef.current) {
+      onResourceSelectionRef.current(selectedIds);
     }
-  }, [selectedFiles, onResourceSelection]);
+  }, []);
+
+  // Only trigger when selectedFiles actually changes
+  useEffect(() => {
+    const selectedIds = Array.from(selectedFiles);
+    notifyResourceSelection(selectedIds);
+  }, [selectedFiles, notifyResourceSelection]);
 
   return {
     // State

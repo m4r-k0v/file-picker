@@ -2,22 +2,12 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { stackAIClient } from '@/lib/stackai-client';
+import { stackAIKeys } from '@/lib/query-keys';
 import {
   StackAIListResourcesRequest,
   StackAIKnowledgeBaseCreateRequest,
 } from '@/types/api';
 
-// Query keys
-export const stackAIKeys = {
-  all: ['stackai'] as const,
-  connections: () => [...stackAIKeys.all, 'connections'] as const,
-  resources: () => [...stackAIKeys.all, 'resources'] as const,
-  resourceList: (params: StackAIListResourcesRequest) => [...stackAIKeys.resources(), params] as const,
-  knowledgeBases: () => [...stackAIKeys.all, 'knowledge-bases'] as const,
-  knowledgeBaseResources: (kbId: string, path: string) => [...stackAIKeys.knowledgeBases(), kbId, 'resources', path] as const,
-};
-
-// Authentication status
 export function useAuthStatus() {
   return {
     isAuthenticated: stackAIClient.isAuthenticated(),
@@ -103,12 +93,18 @@ export function useIndexedFiles() {
     queryKey: ['indexed-files'],
     queryFn: async () => {
       const kbId = stackAIClient.getKnowledgeBaseId();
-      if (!kbId) return [];
+      console.log('🔍 useIndexedFiles - Knowledge Base ID:', kbId);
       
+      if (!kbId) return [];
+
       try {
         const response = await stackAIClient.listKnowledgeBaseResources(kbId);
-        return response.data.map(r => r.resource_id);
-      } catch {
+        const resourceIds = response.data.map(r => r.resource_id);
+        console.log('🔍 useIndexedFiles - Found indexed resources:', resourceIds);
+        console.log('🔍 useIndexedFiles - Full response:', response.data);
+        return resourceIds;
+      } catch (error) {
+        console.error('🔍 useIndexedFiles - Error:', error);
         return [];
       }
     },
@@ -120,18 +116,22 @@ export function useDeleteFile() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ fileId }: { fileId: string }) => {
-      // For Stack AI, this would be removing from knowledge base
+    mutationFn: async ({ fileId, resourcePath }: { fileId: string; resourcePath?: string }) => {
+      // For Stack AI, this removes the file from the knowledge base
       const kbId = stackAIClient.getKnowledgeBaseId();
       if (!kbId) throw new Error('No knowledge base selected');
+
+      // Use resourcePath if provided, otherwise try to use fileId as path
+      // In a real implementation, you'd maintain a mapping of fileId to resourcePath
+      const pathToDelete = resourcePath || fileId;
       
-      // We need to find the resource path from the fileId
-      // This is a simplified implementation - in practice you'd need to track the path
-      return stackAIClient.deleteKnowledgeBaseResource(kbId, fileId);
+      await stackAIClient.deleteKnowledgeBaseResource(kbId, pathToDelete);
+      return { success: true, deletedPath: pathToDelete };
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['files-ui'] });
       queryClient.invalidateQueries({ queryKey: ['indexed-files'] });
+      queryClient.invalidateQueries({ queryKey: stackAIKeys.knowledgeBases() });
     },
     onError: (error) => {
       console.error('Failed to delete file:', error);
@@ -144,14 +144,91 @@ export function useIndexFile() {
 
   return useMutation({
     mutationFn: async ({ fileId }: { fileId: string }) => {
-      // For Stack AI, indexing happens when creating/syncing knowledge base
-      // This is a placeholder - you'd implement the actual indexing logic
-      console.log('Indexing file:', fileId);
-      return { success: true, indexedAt: new Date().toISOString() };
+      const connectionId = stackAIClient.getConnectionId();
+      if (!connectionId) {
+        throw new Error('No connection available');
+      }
+
+      let knowledgeBaseId = stackAIClient.getKnowledgeBaseId();
+      console.log('📝 useIndexFile - Starting index for file:', fileId);
+      console.log('📝 useIndexFile - Current KB ID:', knowledgeBaseId);
+      
+      // If no knowledge base exists, create one
+      if (!knowledgeBaseId) {
+        console.log('📝 useIndexFile - Creating new KB for first file');
+        const kb = await stackAIClient.createKnowledgeBase({
+          connection_id: connectionId,
+          connection_source_ids: [fileId],
+          indexing_params: {
+            ocr: false,
+            unstructured: true,
+            embedding_params: {
+              embedding_model: 'text-embedding-ada-002',
+            },
+            chunker_params: {
+              chunk_size: 1500,
+              chunk_overlap: 500,
+              chunker: 'sentence',
+            },
+          },
+        });
+        
+        knowledgeBaseId = kb.knowledge_base_id;
+        stackAIClient.setKnowledgeBaseId(knowledgeBaseId);
+        console.log('📝 useIndexFile - New KB created:', knowledgeBaseId);
+      } else {
+        console.log('📝 useIndexFile - Adding to existing KB');
+        // Add file to existing knowledge base by creating a new KB with all current files + new file
+        // Note: Stack AI API doesn't support adding individual files to existing KB,
+        // so we need to recreate the KB with all files
+        const currentKbResources = await stackAIClient.listKnowledgeBaseResources(knowledgeBaseId);
+        const existingFileIds = currentKbResources.data.map(r => r.resource_id);
+        console.log('📝 useIndexFile - Existing files in KB:', existingFileIds);
+        const allFileIds = [...existingFileIds, fileId];
+        console.log('📝 useIndexFile - All files for new KB:', allFileIds);
+        
+        const kb = await stackAIClient.createKnowledgeBase({
+          connection_id: connectionId,
+          connection_source_ids: allFileIds,
+          indexing_params: {
+            ocr: false,
+            unstructured: true,
+            embedding_params: {
+              embedding_model: 'text-embedding-ada-002',
+            },
+            chunker_params: {
+              chunk_size: 1500,
+              chunk_overlap: 500,
+              chunker: 'sentence',
+            },
+          },
+        });
+        
+        knowledgeBaseId = kb.knowledge_base_id;
+        stackAIClient.setKnowledgeBaseId(knowledgeBaseId);
+        console.log('📝 useIndexFile - Updated KB created:', knowledgeBaseId);
+      }
+      
+      // Sync the knowledge base to start indexing
+      console.log('📝 useIndexFile - Syncing KB:', knowledgeBaseId);
+      await stackAIClient.syncKnowledgeBase(knowledgeBaseId);
+
+      return { 
+        success: true, 
+        indexedAt: new Date().toISOString(),
+        knowledgeBaseId,
+        fileId 
+      };
     },
     onSuccess: () => {
+      // Invalidate and refetch all relevant queries
       queryClient.invalidateQueries({ queryKey: ['files-ui'] });
       queryClient.invalidateQueries({ queryKey: ['indexed-files'] });
+      queryClient.invalidateQueries({ queryKey: stackAIKeys.knowledgeBases() });
+      
+      // Force immediate refetch to update UI
+      queryClient.refetchQueries({ queryKey: ['files-ui'] });
+      queryClient.refetchQueries({ queryKey: ['indexed-files'] });
     },
     onError: (error) => {
       console.error('Failed to index file:', error);
@@ -163,17 +240,22 @@ export function useDeIndexFile() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ fileId }: { fileId: string }) => {
+    mutationFn: async ({ fileId, resourcePath }: { fileId: string; resourcePath?: string }) => {
       const kbId = stackAIClient.getKnowledgeBaseId();
       if (!kbId) throw new Error('No knowledge base selected');
-      
+
+      // Use resourcePath if provided, otherwise try to use fileId as path
+      // In a real implementation, you'd maintain a mapping of fileId to resourcePath
+      const pathToRemove = resourcePath || fileId;
+
       // Remove from knowledge base
-      await stackAIClient.deleteKnowledgeBaseResource(kbId, fileId);
-      return { success: true };
+      await stackAIClient.deleteKnowledgeBaseResource(kbId, pathToRemove);
+      return { success: true, removedPath: pathToRemove };
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['files-ui'] });
       queryClient.invalidateQueries({ queryKey: ['indexed-files'] });
+      queryClient.invalidateQueries({ queryKey: stackAIKeys.knowledgeBases() });
     },
     onError: (error) => {
       console.error('Failed to de-index file:', error);
