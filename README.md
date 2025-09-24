@@ -1,180 +1,453 @@
 # Stack AI Google Drive File Picker
 
-A modern, responsive file picker for Stack AI's Google Drive integration with knowledge base indexing capabilities. Built with Next.js, TypeScript, Tailwind CSS, and Shadcn UI.
+A modern, production-ready file picker for Stack AI's Google Drive integration with advanced knowledge base indexing capabilities. Built with Next.js 15, TypeScript, NextAuth.js, Tailwind CSS, and Shadcn UI.
 
-**🎉 Now integrated with Stack AI's real API endpoints!**
+**🚀 Fully integrated with Stack AI's real API endpoints and NextAuth.js authentication!**
 
-## Features
+## ✨ Features
 
-### Core Functionality
-- **Stack AI Authentication**: Secure login with Stack AI credentials
-- **Google Drive Connection**: Automatic connection to your Google Drive through Stack AI
-- **File System Navigation**: Browse Google Drive files and folders like a native file manager
-- **Knowledge Base Management**: Create and sync knowledge bases with selected files
-- **Real-time Status**: Visual indicators showing which files are indexed
+### 🔐 Authentication & Security
+- **NextAuth.js Integration**: Secure, industry-standard authentication
+- **Stack AI Credentials Provider**: Login with your Stack AI email/password
+- **Session Management**: Persistent authentication across page reloads
+- **JWT Security**: Secure token handling and automatic refresh
 
-### Advanced Features
-- **Search**: Find files by name across all folders
-- **Sorting**: Sort files by name, date created, date modified, or size
-- **Filtering**: Filter by file type (files/folders) and indexing status
-- **Breadcrumb Navigation**: Easy navigation with clickable breadcrumbs
-- **Bulk Operations**: Select multiple files for batch operations
-- **Responsive Design**: Works seamlessly on desktop and mobile devices
+### 📁 File Management
+- **Google Drive Integration**: Seamless connection to your Google Drive through Stack AI
+- **File System Navigation**: Browse files and folders like a native file manager
+- **Folder Hierarchy**: Navigate through nested folders with breadcrumb navigation
+- **File Type Detection**: Smart icons and type detection for various file formats
+- **Real-time Updates**: Live status indicators for indexed files and folders
 
-## Tech Stack
+### 🗃️ Knowledge Base Operations
+- **Individual File Indexing**: Add single files to your knowledge base
+- **Bulk File Operations**: Select multiple files for batch indexing/de-indexing
+- **Folder Indexing**: Index entire folders and all their contents
+- **Smart Status Detection**: Visual indicators showing indexed status for files and folders
+- **Knowledge Base Sync**: Automatic synchronization with Stack AI's indexing system
 
-- **Framework**: Next.js 15 (App Router)
-- **Language**: TypeScript
-- **Styling**: Tailwind CSS
-- **UI Components**: Shadcn UI
-- **Data Fetching**: Tanstack Query (React Query)
-- **Icons**: Lucide React
+### 🔍 Advanced UI Features
+- **Global Search**: Find files by name across all folders
+- **Multi-column Sorting**: Sort by name, date created, date modified, or size
+- **Advanced Filtering**: Filter by file type (files/folders) and indexing status
+- **Bulk Selection**: Checkbox-based selection for multiple files
+- **Responsive Design**: Optimized for desktop and mobile devices
+- **Virtualized Lists**: Performance optimization for large file lists (50+ items)
 
-## Getting Started
+### 🎯 User Experience
+- **Loading States**: Visual feedback during operations
+- **Error Handling**: Comprehensive error messages and recovery
+- **Debug Tools**: Built-in debugging page for troubleshooting
+- **Accessibility**: ARIA-compliant components and keyboard navigation
+
+## 🛠️ Tech Stack
+
+### Core Technologies
+- **Framework**: Next.js 15 (App Router with Turbopack)
+- **Language**: TypeScript with strict type checking
+- **Authentication**: NextAuth.js with custom credentials provider
+- **Styling**: Tailwind CSS with custom design system
+- **UI Components**: Shadcn UI with custom theme
+
+### Data & State Management
+- **Data Fetching**: Tanstack Query (React Query) v5
+- **State Management**: React hooks with optimized re-rendering
+- **API Client**: Custom Stack AI client with connection pooling
+- **Caching**: Intelligent query caching and invalidation
+
+### Development & Build
+- **Build Tool**: Next.js with Turbopack (development) and Webpack (production)
+- **Package Manager**: npm with lockfile
+- **Icons**: Lucide React icon library
+- **Virtualization**: React Window for large lists
+
+## 🚀 Getting Started
 
 ### Prerequisites
 
-- Node.js 18+ 
-- npm or yarn
-- **Stack AI account with Google Drive connection set up**
+- **Node.js 18+** (recommended: 20+)
+- **npm** or **yarn**
+- **Stack AI account** with Google Drive connection configured
 
 ### Installation
 
-1. Clone the repository:
+1. **Clone the repository:**
 ```bash
-git clone <repository-url>
+git clone https://github.com/your-org/file-picker.git
 cd file-picker
 ```
 
-2. Install dependencies:
+2. **Install dependencies:**
 ```bash
 npm install
 ```
 
-3. Set up environment variables:
+3. **Set up environment variables:**
 ```bash
-cp env.example .env.local
+cp .env.example .env.local
 ```
 
-4. **Set up Google Drive Connection in Stack AI**:
-   - Go to the Stack AI Workflow builder
-   - Click on Knowledge Bases in the left sidebar
-   - Drop the Google Drive node on the canvas
-   - Click "Connect to Google Drive" and follow the authorization steps
+Edit `.env.local` and add:
+```bash
+NEXTAUTH_URL=http://localhost:3000
+NEXTAUTH_SECRET=your-nextauth-secret-key-change-this-in-production
+```
 
-5. Run the development server:
+4. **Set up Google Drive Connection in Stack AI:**
+   - Go to the [Stack AI Workflow builder](https://stack-ai.com)
+   - Click on **Knowledge Bases** in the left sidebar
+   - Drop the **Google Drive node** on the canvas
+   - Click **"Connect to Google Drive"** and complete OAuth authorization
+
+5. **Start the development server:**
 ```bash
 npm run dev
 ```
 
-6. Open [http://localhost:3001](http://localhost:3001) in your browser and login with your Stack AI credentials.
+6. **Open your browser:**
+   - Navigate to [http://localhost:3000](http://localhost:3000) (or the port shown in terminal)
+   - Login with your Stack AI credentials
+   - Start browsing and indexing your Google Drive files!
 
-## Stack AI Integration
+## 🔧 Configuration
 
-The application is fully integrated with Stack AI's API endpoints for Google Drive and knowledge base management.
+### NextAuth.js Setup
 
-### Integrated API Endpoints
+The application uses NextAuth.js with a custom Stack AI credentials provider. The authentication flow:
 
-#### Authentication
-- Stack AI Supabase authentication with email/password
+1. **User Login** → NextAuth credentials provider
+2. **Stack AI Authentication** → Validates with Stack AI Supabase backend  
+3. **Session Creation** → JWT with `orgId`, `connectionId`, and `authToken`
+4. **Client Sync** → Stack AI client automatically configured with session data
 
-#### Google Drive Operations  
-- `GET /connections` - List Google Drive connections
-- `GET /connections/{id}/resources/children` - List files and folders
-- Connection management through Stack AI
+### Environment Variables
 
-#### Knowledge Base Operations
-- `POST /knowledge_bases` - Create new knowledge base
-- `GET /knowledge_bases/sync/trigger/{id}/{org_id}` - Sync knowledge base
-- `GET /knowledge_bases/{id}/resources/children` - List indexed resources
-- `DELETE /knowledge_bases/{id}/resources` - Remove resource from knowledge base
+Required environment variables:
 
-### API Request/Response Format
+```bash
+# NextAuth Configuration
+NEXTAUTH_URL=http://localhost:3000  # Your app URL
+NEXTAUTH_SECRET=your-secret-key     # Generate with: openssl rand -base64 32
 
-See `/src/types/api.ts` for complete TypeScript definitions including both legacy interfaces and new Stack AI interfaces.
+# Stack AI Configuration (automatically configured)
+NEXT_PUBLIC_STACK_AI_API_URL=https://api.stack-ai.com
+```
 
-## Project Structure
+## 🏗️ Project Structure
 
 ```
 src/
-├── app/                    # Next.js app router
-│   ├── api/               # API routes (mock implementation)
-│   ├── globals.css        # Global styles
-│   ├── layout.tsx         # Root layout
-│   └── page.tsx           # Home page
+├── app/                           # Next.js App Router
+│   ├── api/
+│   │   ├── auth/[...nextauth]/   # NextAuth.js API route
+│   │   ├── files/                # Legacy API routes (for reference)
+│   │   └── ...
+│   ├── dashboard/                # Main dashboard page
+│   ├── debug/                    # Debug tools page
+│   ├── globals.css               # Global styles & CSS variables
+│   ├── layout.tsx                # Root layout with providers
+│   └── page.tsx                  # Login page
 ├── components/
-│   ├── auth/              # Authentication components
-│   ├── file-picker/       # File picker components  
-│   ├── knowledge-base/    # Knowledge base management
-│   ├── providers/         # React providers (Query, etc.)
-│   └── ui/                # Shadcn UI components
-├── hooks/                 # Custom React hooks
-├── lib/                   # Utilities and Stack AI client
-└── types/                 # TypeScript type definitions
+│   ├── auth/                     # Authentication components
+│   │   ├── login-form.tsx        # NextAuth login form
+│   │   └── login-form-fields.tsx # Form field components
+│   ├── dashboard/                # Dashboard components
+│   │   └── dashboard-header.tsx  # Header with logout
+│   ├── file-picker/              # File picker components
+│   │   ├── file-picker.tsx       # Main orchestrator component
+│   │   ├── file-list.tsx         # Standard file list
+│   │   ├── file-list-virtualized.tsx # Virtualized list for 50+ items
+│   │   ├── file-item.tsx         # Individual file/folder item
+│   │   ├── file-actions.tsx      # Action buttons (index/delete)
+│   │   ├── file-icon.tsx         # File type icons
+│   │   ├── file-info.tsx         # File metadata display
+│   │   ├── selection-footer.tsx  # Bulk action controls
+│   │   ├── toolbar.tsx           # Search/sort/filter controls
+│   │   └── ...
+│   ├── providers/                # React context providers
+│   │   ├── query-provider.tsx    # Tanstack Query provider
+│   │   └── session-provider.tsx  # NextAuth session provider
+│   └── ui/                       # Shadcn UI base components
+├── hooks/                        # Custom React hooks
+│   ├── use-nextauth.ts          # NextAuth integration hook
+│   ├── use-file-picker.ts       # File picker state management
+│   ├── use-stackai-files.ts     # Stack AI API operations
+│   └── ...
+├── lib/                          # Utilities and clients
+│   ├── stackai-client.ts        # Stack AI API client
+│   ├── query-keys.ts            # Tanstack Query key factory
+│   └── ...
+└── types/                       # TypeScript definitions
+    ├── api.ts                   # API request/response types
+    └── next-auth.d.ts          # NextAuth type extensions
 ```
 
-## Key Components
+## 🎯 Key Components
 
-### LoginForm
-Handles Stack AI authentication with email/password.
+### Authentication System
 
-### FilePicker
-The main component that orchestrates the file browsing experience with Stack AI integration.
+#### `useAuth()` Hook
+Provides authentication state and actions:
+```typescript
+const { 
+  isAuthenticated, 
+  isLoading, 
+  session, 
+  connectionId, 
+  orgId, 
+  login, 
+  logout 
+} = useAuth();
+```
 
-### KnowledgeBaseManager
-Manages knowledge base creation and synchronization with selected files.
+#### `LoginForm`
+NextAuth-integrated login form with Stack AI credentials provider.
 
-### FileItem
-Individual file/folder component with actions for knowledge base operations.
+### File Management
 
-### Toolbar
-Search, sort, and filter controls for the file browser.
+#### `FilePicker`
+Main orchestrator component that manages:
+- File browsing state
+- Selection management
+- Bulk operations
+- API integration
 
-### Breadcrumb
-Navigation breadcrumb for folder hierarchy.
+#### `useFilePicker()` Hook
+Centralized state management for file operations:
+```typescript
+const {
+  filteredFiles,
+  selectedFiles,
+  handleBulkIndex,
+  handleBulkDeIndex,
+  isItemIndexed,
+  // ... more state and actions
+} = useFilePicker({ onResourceSelection });
+```
 
-## Customization
+### Stack AI Integration
 
-### Styling
-The application uses Tailwind CSS with Shadcn UI components. You can customize:
-- Colors in `tailwind.config.ts`
-- Component styles in individual component files
-- Global styles in `src/app/globals.css`
+#### `StackAIClient`
+Comprehensive API client for Stack AI operations:
+```typescript
+// Authentication
+await stackAIClient.authenticate({ email, password });
 
-### API Integration
-Replace the mock API routes in `/src/app/api/` with your actual Google Drive API integration.
+// File operations
+const files = await stackAIClient.listResources({ resource_id: folderId });
 
-### Icons and File Types
-Customize file type detection and icons in `/src/components/file-picker/file-icon.tsx`.
+// Knowledge base operations
+const kb = await stackAIClient.createKnowledgeBase({
+  connection_id: connectionId,
+  connection_source_ids: [fileId],
+  indexing_params: { /* ... */ }
+});
+```
 
-## Development
+#### API Hooks
+Tanstack Query-powered hooks for data operations:
+```typescript
+// File operations
+const { data: files, isLoading } = useFiles({ folderId });
+const { data: indexedFiles } = useIndexedFiles();
+
+// Indexing operations
+const indexFile = useIndexFile();
+const bulkIndex = useBulkIndexFiles();
+const bulkDeIndex = useBulkDeIndexFiles();
+```
+
+## 🔄 API Integration
+
+### Stack AI Endpoints
+
+The application integrates with these Stack AI API endpoints:
+
+#### Authentication
+- `POST /auth/v1/token` - Supabase authentication
+- `GET /organizations/me/current` - Get organization ID
+
+#### Google Drive Operations
+- `GET /connections` - List Google Drive connections
+- `GET /connections/{id}/resources/children` - List files and folders
+
+#### Knowledge Base Operations
+- `POST /knowledge_bases` - Create knowledge base
+- `GET /knowledge_bases/sync/trigger/{id}/{org_id}` - Trigger sync
+- `GET /knowledge_bases/{id}/resources/children` - List indexed resources
+- `DELETE /knowledge_bases/{id}/resources` - Remove resources
+
+### Request/Response Types
+
+All API types are defined in `/src/types/api.ts`:
+
+```typescript
+// Stack AI Resource
+export type StackAIResource = {
+  resource_id: string;
+  inode_type: 'file' | 'directory';
+  inode_path: { path: string };
+  status?: 'pending' | 'indexed' | 'failed';
+  // ...
+};
+
+// Knowledge Base Creation
+export type StackAIKnowledgeBaseCreateRequest = {
+  connection_id: string;
+  connection_source_ids: string[];
+  indexing_params: {
+    ocr: boolean;
+    unstructured: boolean;
+    embedding_params: { embedding_model: string };
+    chunker_params: { chunk_size: number; chunk_overlap: number; chunker: string };
+  };
+};
+```
+
+## 🎨 Customization
+
+### Styling & Theme
+
+The application uses a custom light theme inspired by Google Drive:
+
+```css
+/* src/app/globals.css */
+:root {
+  --background: 0 0% 100%;           /* Pure white background */
+  --foreground: 222.2 84% 4.9%;      /* Dark text */
+  --primary: 221.2 83.2% 53.3%;      /* Blue primary color */
+  /* ... more CSS variables */
+}
+```
+
+### UI Components
+
+Customize Shadcn UI components in `/src/components/ui/`:
+- Modify default styles
+- Add new component variants
+- Extend component APIs
+
+### File Type Detection
+
+Customize file icons and type detection in `/src/components/file-picker/file-icon.tsx`:
+
+```typescript
+// Add new file type
+if (mimeType.includes('your-type') || fileName.endsWith('.ext')) {
+  return <YourIcon className={className} />;
+}
+```
+
+## 🧪 Development
 
 ### Available Scripts
 
-- `npm run dev` - Start development server
-- `npm run build` - Build for production
-- `npm run start` - Start production server
-- `npm run lint` - Run ESLint
+```bash
+# Development
+npm run dev          # Start development server with hot reload
+npm run build        # Build for production
+npm run start        # Start production server
+npm run lint         # Run ESLint with auto-fix
+
+# Debugging
+# Visit http://localhost:3000/debug for authentication debugging
+```
+
+### Debug Tools
+
+The application includes a built-in debug page at `/debug`:
+- NextAuth session information
+- Stack AI client state
+- Authentication token status
+- Connection and organization IDs
 
 ### Adding New Features
 
-1. Define types in `/src/types/api.ts`
-2. Add API client methods in `/src/lib/api-client.ts`
-3. Create custom hooks in `/src/hooks/`
-4. Build UI components in `/src/components/`
+1. **Define Types**: Add TypeScript interfaces in `/src/types/api.ts`
+2. **API Methods**: Extend `StackAIClient` in `/src/lib/stackai-client.ts`
+3. **React Hooks**: Create custom hooks in `/src/hooks/`
+4. **UI Components**: Build components in `/src/components/`
+5. **Integration**: Connect everything in main components
 
-## Production Deployment
+Example: Adding a new API operation:
 
-1. Set up your Google Drive API credentials
-2. Configure your knowledge base API endpoints
-3. Update environment variables for production
-4. Build and deploy:
+```typescript
+// 1. Define types
+export type NewOperationRequest = {
+  param1: string;
+  param2: number;
+};
 
+// 2. Add client method
+async newOperation(params: NewOperationRequest) {
+  const response = await fetch(`${BACKEND_URL}/new-endpoint`, {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${this.authToken}` },
+    body: JSON.stringify(params),
+  });
+  return response.json();
+}
+
+// 3. Create hook
+export function useNewOperation() {
+  return useMutation({
+    mutationFn: (params: NewOperationRequest) => 
+      stackAIClient.newOperation(params),
+  });
+}
+
+// 4. Use in component
+const newOperation = useNewOperation();
+const handleClick = () => newOperation.mutate({ param1: 'value', param2: 123 });
+```
+
+## 🚀 Production Deployment
+
+### Build Configuration
+
+1. **Environment Variables:**
+```bash
+NEXTAUTH_URL=https://your-domain.com
+NEXTAUTH_SECRET=your-production-secret
+```
+
+2. **Build and Deploy:**
 ```bash
 npm run build
 npm run start
 ```
 
-## License
+### Performance Considerations
 
-This project is licensed under the MIT License.
+- **Virtualized Lists**: Automatically enabled for 50+ items
+- **Query Caching**: Intelligent caching with Tanstack Query
+- **Image Optimization**: Next.js automatic image optimization
+- **Bundle Splitting**: Automatic code splitting with Next.js
+
+### Security Best Practices
+
+- **NextAuth.js**: Industry-standard authentication
+- **JWT Security**: Secure token handling
+- **CSRF Protection**: Built-in CSRF protection
+- **Environment Variables**: Sensitive data in environment variables
+- **API Rate Limiting**: Respect Stack AI API rate limits
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch: `git checkout -b feature/amazing-feature`
+3. Commit your changes: `git commit -m 'Add amazing feature'`
+4. Push to the branch: `git push origin feature/amazing-feature`
+5. Open a Pull Request
+
+## 📝 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🙏 Acknowledgments
+
+- **Stack AI** for the robust API and Google Drive integration
+- **NextAuth.js** for secure authentication
+- **Shadcn UI** for beautiful, accessible components
+- **Tanstack Query** for powerful data synchronization
+- **Vercel** for Next.js and deployment platform
