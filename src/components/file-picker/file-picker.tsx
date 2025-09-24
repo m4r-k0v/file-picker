@@ -19,7 +19,7 @@ export function FilePicker({
   onShowKnowledgeBaseManager
 }: FilePickerProps = {}) {
   const {
-    // State
+    
     breadcrumbPath,
     selectedFiles,
     searchQuery,
@@ -27,17 +27,17 @@ export function FilePicker({
     sortDirection,
     filters,
 
-    // Data
+    
     filteredFiles,
     isItemIndexed,
     isLoading,
 
-    // Selection statistics
+    
     selectedFilesArray,
     selectedIndexedCount,
     selectedNotIndexedCount,
 
-    // Actions
+    
     handleNavigate,
     handleBreadcrumbNavigate,
     handleFileSelect,
@@ -46,7 +46,7 @@ export function FilePicker({
     setSearchQuery,
     setFilters,
 
-    // Bulk actions
+    
     handleBulkIndex,
     handleBulkDeIndex,
     isBulkIndexing,

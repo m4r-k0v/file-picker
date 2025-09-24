@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-// Mock indexed files data - in a real app, this would be in a database
 const indexedFiles = new Set(['3', '5']);
 
 export async function POST(request: NextRequest) {
@@ -14,13 +13,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Simulate de-indexing process
-    // De-indexing file from knowledge base
     
-    // Add some processing time
+    
+    
+    
     await new Promise(resolve => setTimeout(resolve, 500));
 
-    // Remove from indexed files
+    
     indexedFiles.delete(fileId);
 
     return NextResponse.json({ success: true });

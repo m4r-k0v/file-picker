@@ -1,4 +1,4 @@
-// Stack AI Resource type
+
 export type StackAIResource = {
   resource_id: string;
   inode_type: 'file' | 'directory';
@@ -12,7 +12,7 @@ export type StackAIResource = {
   size?: number;
 }
 
-// Legacy DriveItem type for compatibility
+
 export type DriveItem = {
   id: string;
   name: string;
@@ -27,7 +27,7 @@ export type DriveItem = {
   isIndexed?: boolean;
 }
 
-// Stack AI API Response types
+
 export type StackAIConnection = {
   connection_id: string;
   name: string;
@@ -63,7 +63,7 @@ export type StackAIKnowledgeBase = {
   cron_job_id?: string;
 }
 
-// Legacy API Response types for compatibility
+
 export type ListFilesResponse = {
   files: DriveItem[];
   nextPageToken?: string;
@@ -76,16 +76,16 @@ export type ApiError = {
   statusCode: number;
 }
 
-// Stack AI API Request types
+
 export type StackAIAuthRequest = {
   email: string;
   password: string;
 }
 
 export type StackAIListResourcesRequest = {
-  resource_id?: string; // For listing children of a specific resource
-  resource_path?: string; // Alternative way to specify path
-  cursor?: string; // For pagination
+  resource_id?: string; 
+  resource_path?: string; 
+  cursor?: string; 
 }
 
 export type StackAIKnowledgeBaseCreateRequest = {
@@ -108,14 +108,14 @@ export type StackAIKnowledgeBaseCreateRequest = {
   cron_job_id?: string;
 }
 
-// Legacy API Request types for compatibility
+
 export type ListFilesRequest = {
-  folderId?: string; // If not provided, lists root folder
+  folderId?: string; 
   pageToken?: string;
   pageSize?: number;
   orderBy?: 'name' | 'createdTime' | 'modifiedTime' | 'size';
   sortDirection?: 'asc' | 'desc';
-  nameFilter?: string; // For searching by name
+  nameFilter?: string; 
 }
 
 export type DeleteFileRequest = {
@@ -132,7 +132,7 @@ export type DeIndexFileRequest = {
   knowledgeBaseId?: string;
 }
 
-// Knowledge Base related types
+
 export type KnowledgeBase = {
   id: string;
   name: string;
@@ -148,7 +148,7 @@ export type IndexedFile = {
   status: 'indexed' | 'indexing' | 'failed';
 }
 
-// Sorting and filtering types
+
 export type SortField = 'name' | 'createdTime' | 'modifiedTime' | 'size';
 export type SortDirection = 'asc' | 'desc';
 

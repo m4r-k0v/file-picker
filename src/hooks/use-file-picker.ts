@@ -14,7 +14,6 @@ export type UseFilePickerProps = {
 }
 
 export function useFilePicker({ onResourceSelection }: UseFilePickerProps = {}) {
-  // State management
   const [currentFolderId, setCurrentFolderId] = useState<string | undefined>();
   const [breadcrumbPath, setBreadcrumbPath] = useState<BreadcrumbItem[]>([]);
   const [selectedFiles, setSelectedFiles] = useState<Set<string>>(new Set());
@@ -26,11 +25,9 @@ export function useFilePicker({ onResourceSelection }: UseFilePickerProps = {}) 
     indexedFilter: 'all',
   });
 
-  // Use ref to store the callback to avoid dependency issues
   const onResourceSelectionRef = useRef(onResourceSelection);
   onResourceSelectionRef.current = onResourceSelection;
 
-  // API queries
   const { data: filesData, isLoading, error, refetch } = useFiles({
     folderId: currentFolderId,
     nameFilter: searchQuery || undefined,
@@ -39,19 +36,17 @@ export function useFilePicker({ onResourceSelection }: UseFilePickerProps = {}) 
   const { data: indexedData = { resourceIds: [], indexedFolders: [] } } = useIndexedFiles();
   const indexedFileIds = useMemo(() => indexedData.resourceIds || [], [indexedData.resourceIds]);
 
-  // Bulk operations
   const bulkIndexMutation = useBulkIndexFiles();
   const bulkDeIndexMutation = useBulkDeIndexFiles();
 
-  // Helper function to check if an item is indexed (directly or through parent folder)
   const isItemIndexed = useCallback((item: DriveItem) => {
-    // Check if the item itself is indexed
+    
     if (indexedFileIds.includes(item.id)) {
       return true;
     }
     
-    // For files, check if they're in an indexed folder
-    // This is a simplified check - in a real app you'd need proper path matching
+    
+    
     if (item.type === 'file' && item.parentId) {
       return indexedFileIds.includes(item.parentId);
     }
@@ -59,27 +54,27 @@ export function useFilePicker({ onResourceSelection }: UseFilePickerProps = {}) 
     return false;
   }, [indexedFileIds]);
 
-  // Filter and sort files
+  
   const filteredFiles = useMemo(() => {
     if (!filesData?.files) return [];
 
     let filtered = filesData.files;
 
-    // Apply type filter
+    
     if (filters.typeFilter === 'files') {
       filtered = filtered.filter(item => item.type === 'file');
     } else if (filters.typeFilter === 'folders') {
       filtered = filtered.filter(item => item.type === 'folder');
     }
 
-    // Apply indexed filter
+    
     if (filters.indexedFilter === 'indexed') {
       filtered = filtered.filter(item => isItemIndexed(item));
     } else if (filters.indexedFilter === 'not-indexed') {
       filtered = filtered.filter(item => !isItemIndexed(item));
     }
 
-    // Apply client-side sorting
+    
     filtered.sort((a, b) => {
       let aValue: string | number | Date;
       let bValue: string | number | Date;
@@ -113,13 +108,13 @@ export function useFilePicker({ onResourceSelection }: UseFilePickerProps = {}) 
     return filtered;
   }, [filesData?.files, filters, isItemIndexed, sortField, sortDirection]);
 
-  // Navigation handlers - memoized to prevent unnecessary re-renders
+  
   const handleNavigate = useCallback((folderId?: string, folderName?: string) => {
     if (folderId) {
-      // Navigate into folder
+      
       setBreadcrumbPath(prev => [...prev, { id: folderId, name: folderName || 'Unknown' }]);
     } else {
-      // Navigate to root
+      
       setBreadcrumbPath([]);
     }
     setCurrentFolderId(folderId);
@@ -128,11 +123,11 @@ export function useFilePicker({ onResourceSelection }: UseFilePickerProps = {}) 
 
   const handleBreadcrumbNavigate = useCallback((folderId?: string) => {
     if (!folderId) {
-      // Navigate to root
+      
       setBreadcrumbPath([]);
       setCurrentFolderId(undefined);
     } else {
-      // Navigate to specific folder in breadcrumb
+      
       setBreadcrumbPath(prev => {
         const folderIndex = prev.findIndex(item => item.id === folderId);
         if (folderIndex >= 0) {
@@ -145,7 +140,7 @@ export function useFilePicker({ onResourceSelection }: UseFilePickerProps = {}) 
     setSelectedFiles(new Set());
   }, []);
 
-  // Selection handlers - memoized to prevent unnecessary re-renders
+  
   const handleFileSelect = useCallback((fileId: string, selected: boolean) => {
     setSelectedFiles(prev => {
       const newSet = new Set(prev);
@@ -162,13 +157,13 @@ export function useFilePicker({ onResourceSelection }: UseFilePickerProps = {}) 
     setSelectedFiles(new Set());
   }, []);
 
-  // Sort handlers - memoized to prevent unnecessary re-renders
+  
   const handleSortChange = useCallback((field: SortField, direction: SortDirection) => {
     setSortField(field);
     setSortDirection(direction);
   }, []);
 
-  // Calculate selection statistics
+  
   const selectedFilesArray = useMemo(() => Array.from(selectedFiles), [selectedFiles]);
   const selectedItems = useMemo(() => {
     if (!filesData?.files) return [];
@@ -183,7 +178,7 @@ export function useFilePicker({ onResourceSelection }: UseFilePickerProps = {}) 
     return selectedItems.filter(item => !isItemIndexed(item)).length;
   }, [selectedItems, isItemIndexed]);
 
-  // Bulk action handlers
+  
   const handleBulkIndex = useCallback((fileIds: string[]) => {
     const notIndexedIds = fileIds.filter(id => {
       const item = filesData?.files?.find(f => f.id === id);
@@ -204,16 +199,16 @@ export function useFilePicker({ onResourceSelection }: UseFilePickerProps = {}) 
     }
   }, [filesData?.files, isItemIndexed, bulkDeIndexMutation]);
 
-  // Only trigger when selectedFiles actually changes
+  
   useEffect(() => {
     const selectedIds = Array.from(selectedFiles);
     if (onResourceSelectionRef.current) {
       onResourceSelectionRef.current(selectedIds);
     }
-  }, [selectedFiles]); // Remove notifyResourceSelection from dependencies
+  }, [selectedFiles]); 
 
   return {
-    // State
+    
     currentFolderId,
     breadcrumbPath,
     selectedFiles,
@@ -222,19 +217,19 @@ export function useFilePicker({ onResourceSelection }: UseFilePickerProps = {}) 
     sortDirection,
     filters,
     
-    // Data
+    
     filteredFiles,
     indexedFileIds,
-    isItemIndexed, // Add the helper function
+    isItemIndexed, 
     isLoading,
     error,
     
-    // Selection statistics
+    
     selectedFilesArray,
     selectedIndexedCount,
     selectedNotIndexedCount,
     
-    // Actions
+    
     handleNavigate,
     handleBreadcrumbNavigate,
     handleFileSelect,
@@ -244,7 +239,7 @@ export function useFilePicker({ onResourceSelection }: UseFilePickerProps = {}) 
     setFilters,
     refetch,
     
-    // Bulk actions
+    
     handleBulkIndex,
     handleBulkDeIndex,
     isBulkIndexing: bulkIndexMutation.isPending,

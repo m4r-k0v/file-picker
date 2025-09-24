@@ -1,6 +1,6 @@
 import { StackAIListResourcesRequest, ListFilesRequest } from '@/types/api';
 
-// Stack AI Query Keys
+
 export const stackAIKeys = {
   all: ['stackai'] as const,
   connections: () => [...stackAIKeys.all, 'connections'] as const,
@@ -10,7 +10,7 @@ export const stackAIKeys = {
   knowledgeBaseResources: (kbId: string, path: string) => [...stackAIKeys.knowledgeBases(), kbId, 'resources', path] as const,
 };
 
-// Legacy Query Keys (for backward compatibility)
+
 export const fileKeys = {
   all: ['files'] as const,
   lists: () => [...fileKeys.all, 'list'] as const,

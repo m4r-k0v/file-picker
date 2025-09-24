@@ -30,7 +30,7 @@ export function Toolbar({
   onFilterChange,
 }: ToolbarProps) {
   const handleSortFieldChange = (field: SortField) => {
-    // If clicking the same field, toggle direction
+    
     if (field === sortField) {
       onSortChange(field, sortDirection === 'asc' ? 'desc' : 'asc');
     } else {
@@ -40,7 +40,7 @@ export function Toolbar({
 
   return (
     <div className="flex items-center gap-4 p-4 border-b bg-background">
-      {/* Search Input */}
+      {}
       <div className="relative flex-1 max-w-md">
         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
         <Input
@@ -51,7 +51,7 @@ export function Toolbar({
         />
       </div>
 
-      {/* Sort Dropdown */}
+      {}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="outline" size="sm">
@@ -75,7 +75,7 @@ export function Toolbar({
         </DropdownMenuContent>
       </DropdownMenu>
 
-      {/* Filter Dropdown */}
+      {}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="outline" size="sm">

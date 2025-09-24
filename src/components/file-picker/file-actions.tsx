@@ -32,14 +32,6 @@ export function FileActions({ item, isIndexed, onLoadingStateChange }: FileActio
   };
 
   const handleIndex = () => {
-    console.log('📝 FileActions - handleIndex called for:', {
-      id: item.id,
-      name: item.name,
-      type: item.type,
-      isIndexed,
-      action: isIndexed ? 'de-index' : 'index'
-    });
-    
     if (isIndexed) {
       deIndexFileMutation.mutate({ fileId: item.id });
     } else {
@@ -47,7 +39,6 @@ export function FileActions({ item, isIndexed, onLoadingStateChange }: FileActio
     }
   };
 
-  // Notify parent component about loading state changes
   const isIndexing = indexFileMutation.isPending || deIndexFileMutation.isPending;
   
   useEffect(() => {
@@ -69,7 +60,6 @@ export function FileActions({ item, isIndexed, onLoadingStateChange }: FileActio
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="bg-white">
-          {/* Index/De-index option for both files and folders */}
           <DropdownMenuItem
             onClick={handleIndex}
             disabled={indexFileMutation.isPending || deIndexFileMutation.isPending}
@@ -87,7 +77,6 @@ export function FileActions({ item, isIndexed, onLoadingStateChange }: FileActio
             }
           </DropdownMenuItem>
 
-          {/* Delete option */}
           <DropdownMenuItem
             onClick={handleDelete}
             disabled={deleteFileMutation.isPending}

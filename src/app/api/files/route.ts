@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { DriveItem, ListFilesResponse } from '@/types/api';
 
-// Mock data for demonstration
+
 const mockFiles: DriveItem[] = [
   {
     id: '1',
@@ -9,7 +9,7 @@ const mockFiles: DriveItem[] = [
     type: 'folder',
     createdTime: '2024-01-15T10:30:00Z',
     modifiedTime: '2024-01-20T14:45:00Z',
-    webViewLink: 'https://drive.google.com/drive/folders/1',
+    webViewLink: 'https:
   },
   {
     id: '2',
@@ -17,7 +17,7 @@ const mockFiles: DriveItem[] = [
     type: 'folder',
     createdTime: '2024-01-10T09:15:00Z',
     modifiedTime: '2024-01-18T16:20:00Z',
-    webViewLink: 'https://drive.google.com/drive/folders/2',
+    webViewLink: 'https:
   },
   {
     id: '3',
@@ -27,7 +27,7 @@ const mockFiles: DriveItem[] = [
     size: 2547832,
     createdTime: '2024-01-12T11:20:00Z',
     modifiedTime: '2024-01-12T11:20:00Z',
-    webViewLink: 'https://drive.google.com/file/d/3/view',
+    webViewLink: 'https:
   },
   {
     id: '4',
@@ -37,7 +37,7 @@ const mockFiles: DriveItem[] = [
     size: 45678,
     createdTime: '2024-01-14T15:30:00Z',
     modifiedTime: '2024-01-16T09:45:00Z',
-    webViewLink: 'https://drive.google.com/file/d/4/view',
+    webViewLink: 'https:
   },
   {
     id: '5',
@@ -47,7 +47,7 @@ const mockFiles: DriveItem[] = [
     size: 123456,
     createdTime: '2024-01-08T13:15:00Z',
     modifiedTime: '2024-01-19T10:30:00Z',
-    webViewLink: 'https://drive.google.com/file/d/5/view',
+    webViewLink: 'https:
   },
   {
     id: '6',
@@ -57,13 +57,13 @@ const mockFiles: DriveItem[] = [
     size: 8765432,
     createdTime: '2024-01-11T16:45:00Z',
     modifiedTime: '2024-01-17T12:20:00Z',
-    webViewLink: 'https://drive.google.com/file/d/6/view',
+    webViewLink: 'https:
   },
 ];
 
-// Mock folder contents
+
 const folderContents: Record<string, DriveItem[]> = {
-  '1': [ // Documents folder
+  '1': [ 
     {
       id: '7',
       name: 'Contract.pdf',
@@ -73,7 +73,7 @@ const folderContents: Record<string, DriveItem[]> = {
       createdTime: '2024-01-13T14:20:00Z',
       modifiedTime: '2024-01-13T14:20:00Z',
       parentId: '1',
-      webViewLink: 'https://drive.google.com/file/d/7/view',
+      webViewLink: 'https:
     },
     {
       id: '8',
@@ -84,10 +84,10 @@ const folderContents: Record<string, DriveItem[]> = {
       createdTime: '2024-01-15T11:30:00Z',
       modifiedTime: '2024-01-15T11:30:00Z',
       parentId: '1',
-      webViewLink: 'https://drive.google.com/file/d/8/view',
+      webViewLink: 'https:
     },
   ],
-  '2': [ // Images folder
+  '2': [ 
     {
       id: '9',
       name: 'logo.png',
@@ -97,7 +97,7 @@ const folderContents: Record<string, DriveItem[]> = {
       createdTime: '2024-01-09T10:15:00Z',
       modifiedTime: '2024-01-09T10:15:00Z',
       parentId: '2',
-      webViewLink: 'https://drive.google.com/file/d/9/view',
+      webViewLink: 'https:
     },
     {
       id: '10',
@@ -108,7 +108,7 @@ const folderContents: Record<string, DriveItem[]> = {
       createdTime: '2024-01-11T15:45:00Z',
       modifiedTime: '2024-01-11T15:45:00Z',
       parentId: '2',
-      webViewLink: 'https://drive.google.com/file/d/10/view',
+      webViewLink: 'https:
     },
   ],
 };
@@ -120,17 +120,17 @@ export async function GET(request: NextRequest) {
   const orderBy = searchParams.get('orderBy') as 'name' | 'createdTime' | 'modifiedTime' | 'size';
   const sortDirection = searchParams.get('sortDirection') as 'asc' | 'desc';
 
-  // Get files based on folder
+  
   let files = folderId ? (folderContents[folderId] || []) : mockFiles;
 
-  // Apply name filter
+  
   if (nameFilter) {
     files = files.filter(file => 
       file.name.toLowerCase().includes(nameFilter.toLowerCase())
     );
   }
 
-  // Apply sorting
+  
   if (orderBy) {
     files.sort((a, b) => {
       let aValue: string | number | Date;

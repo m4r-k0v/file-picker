@@ -57,7 +57,7 @@ export const FileItem = memo(function FileItem({
     </div>
   );
 }, (prevProps, nextProps) => {
-  // Custom comparison function for memo
+  
   return (
     prevProps.item.id === nextProps.item.id &&
     prevProps.isSelected === nextProps.isSelected &&

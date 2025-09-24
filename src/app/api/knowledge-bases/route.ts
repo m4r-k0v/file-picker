@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { KnowledgeBase } from '@/types/api';
 
-// Mock knowledge bases data
+
 const mockKnowledgeBases: KnowledgeBase[] = [
   {
     id: 'kb1',

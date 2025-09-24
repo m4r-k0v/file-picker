@@ -16,7 +16,6 @@ export function useAuthStatus() {
   };
 }
 
-// Connections
 export function useConnections() {
   return useQuery({
     queryKey: stackAIKeys.connections(),
@@ -25,7 +24,6 @@ export function useConnections() {
   });
 }
 
-// Resources (for file picker)
 export function useStackAIResources(params: StackAIListResourcesRequest = {}) {
   return useQuery({
     queryKey: stackAIKeys.resourceList(params),
@@ -34,37 +32,21 @@ export function useStackAIResources(params: StackAIListResourcesRequest = {}) {
   });
 }
 
-// Compatibility hook for existing UI
 export function useFiles(params: { folderId?: string; nameFilter?: string } = {}) {
   const isAuthenticated = stackAIClient.isAuthenticated();
   const connectionId = stackAIClient.getConnectionId();
   const queryEnabled = isAuthenticated && !!connectionId;
   
-  console.log('🔍 useFiles - Debug Info:', {
-    isAuthenticated,
-    connectionId,
-    authToken: stackAIClient.getAuthToken() ? 'present' : 'missing',
-    queryEnabled,
-    params
-  });
 
   return useQuery({
     queryKey: ['files-ui', params],
     queryFn: () => {
-      console.log('📝 useFiles - queryFn called, about to call getFilesForUI');
       return stackAIClient.getFilesForUI(params);
     },
     enabled: queryEnabled,
-    onSuccess: (data) => {
-      console.log('✅ useFiles - Query succeeded with', data?.files?.length || 0, 'files');
-    },
-    onError: (error) => {
-      console.error('❌ useFiles - Query failed:', error);
-    },
   });
 }
 
-// Knowledge base operations
 export function useCreateKnowledgeBase() {
   const queryClient = useQueryClient();
 
@@ -108,7 +90,6 @@ export function useDeleteKnowledgeBaseResource() {
   });
 }
 
-// Legacy hooks for compatibility (these will use mock data if not connected to Stack AI)
 export function useIndexedFiles() {
   return useQuery({
     queryKey: ['indexed-files'],
@@ -122,19 +103,15 @@ export function useIndexedFiles() {
         const resources = response.data;
         const resourceIds = resources.map(r => r.resource_id);
         
-        // Separate folders from files for better filtering
         const indexedFolders = resources
           .filter(r => r.inode_type === 'directory')
           .map(r => ({
             id: r.resource_id,
             path: r.inode_path.path
           }));
-          
         
         return { resourceIds, indexedFolders };
       } catch (error) {
-        // Silently handle error when no knowledge base exists yet
-        // This is expected behavior when user hasn't created a knowledge base
         return { resourceIds: [], indexedFolders: [] };
       }
     },
@@ -147,12 +124,9 @@ export function useDeleteFile() {
 
   return useMutation({
     mutationFn: async ({ fileId, resourcePath }: { fileId: string; resourcePath?: string }) => {
-      // For Stack AI, this removes the file from the knowledge base
       const kbId = stackAIClient.getKnowledgeBaseId();
       if (!kbId) throw new Error('No knowledge base selected');
 
-      // Use resourcePath if provided, otherwise try to use fileId as path
-      // In a real implementation, you'd maintain a mapping of fileId to resourcePath
       const pathToDelete = resourcePath || fileId;
       
       await stackAIClient.deleteKnowledgeBaseResource(kbId, pathToDelete);
@@ -163,9 +137,6 @@ export function useDeleteFile() {
       queryClient.invalidateQueries({ queryKey: ['indexed-files'] });
       queryClient.invalidateQueries({ queryKey: stackAIKeys.knowledgeBases() });
     },
-    onError: (error) => {
-      // Error is handled by mutation error state
-    },
   });
 }
 
@@ -174,19 +145,13 @@ export function useIndexFile() {
 
   return useMutation({
     mutationFn: async ({ fileId }: { fileId: string }) => {
-      console.log('📝 useIndexFile - Starting indexing for fileId:', fileId);
-      
       const connectionId = stackAIClient.getConnectionId();
       if (!connectionId) {
-        console.error('❌ No connection available');
         throw new Error('No connection available');
       }
 
-      console.log('📝 useIndexFile - Using connectionId:', connectionId);
       let knowledgeBaseId = stackAIClient.getKnowledgeBaseId();
-      console.log('📝 useIndexFile - Current knowledgeBaseId:', knowledgeBaseId);
       
-      // If no knowledge base exists, create one
       if (!knowledgeBaseId) {
         const kb = await stackAIClient.createKnowledgeBase({
           connection_id: connectionId,
@@ -208,9 +173,6 @@ export function useIndexFile() {
         knowledgeBaseId = kb.knowledge_base_id;
         stackAIClient.setKnowledgeBaseId(knowledgeBaseId);
       } else {
-        // Add resource to existing knowledge base by creating a new KB with all current resources + new resource
-        // Note: Stack AI API doesn't support adding individual resources to existing KB,
-        // so we need to recreate the KB with all resources
         const currentKbResources = await stackAIClient.listKnowledgeBaseResources(knowledgeBaseId);
         const existingFileIds = currentKbResources.data.map(r => r.resource_id);
         const allFileIds = [...existingFileIds, fileId];
@@ -236,7 +198,6 @@ export function useIndexFile() {
         stackAIClient.setKnowledgeBaseId(knowledgeBaseId);
       }
       
-      // Sync the knowledge base to start indexing
       await stackAIClient.syncKnowledgeBase(knowledgeBaseId);
 
       return { 
@@ -247,17 +208,12 @@ export function useIndexFile() {
       };
     },
     onSuccess: () => {
-      // Invalidate and refetch all relevant queries
       queryClient.invalidateQueries({ queryKey: ['files-ui'] });
       queryClient.invalidateQueries({ queryKey: ['indexed-files'] });
       queryClient.invalidateQueries({ queryKey: stackAIKeys.knowledgeBases() });
       
-      // Force immediate refetch to update UI
       queryClient.refetchQueries({ queryKey: ['files-ui'] });
       queryClient.refetchQueries({ queryKey: ['indexed-files'] });
-    },
-    onError: (error) => {
-      // Error is handled by mutation error state
     },
   });
 }
@@ -270,11 +226,8 @@ export function useDeIndexFile() {
       const kbId = stackAIClient.getKnowledgeBaseId();
       if (!kbId) throw new Error('No knowledge base selected');
 
-      // Use resourcePath if provided, otherwise try to use fileId as path
-      // In a real implementation, you'd maintain a mapping of fileId to resourcePath
       const pathToRemove = resourcePath || fileId;
 
-      // Remove from knowledge base
       await stackAIClient.deleteKnowledgeBaseResource(kbId, pathToRemove);
       return { success: true, removedPath: pathToRemove };
     },
@@ -283,45 +236,32 @@ export function useDeIndexFile() {
       queryClient.invalidateQueries({ queryKey: ['indexed-files'] });
       queryClient.invalidateQueries({ queryKey: stackAIKeys.knowledgeBases() });
     },
-    onError: (error) => {
-      // Error is handled by mutation error state
-    },
   });
 }
 
-// Bulk operations
 export function useBulkIndexFiles() {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async ({ fileIds }: { fileIds: string[] }) => {
-      console.log('📝 useBulkIndexFiles - Starting bulk index for resources:', fileIds);
-      
       const connectionId = stackAIClient.getConnectionId();
       if (!connectionId) {
-        console.error('❌ No connection available for bulk indexing');
         throw new Error('No connection available');
       }
-
-      console.log('📝 useBulkIndexFiles - Using connectionId:', connectionId);
       let knowledgeBaseId = stackAIClient.getKnowledgeBaseId();
       
-      // Get existing resources if KB exists
       let existingFileIds: string[] = [];
       if (knowledgeBaseId) {
         try {
           const currentKbResources = await stackAIClient.listKnowledgeBaseResources(knowledgeBaseId);
           existingFileIds = currentKbResources.data.map(r => r.resource_id);
         } catch (error) {
-          // If failed to get existing resources, create new KB
           knowledgeBaseId = undefined;
         }
       }
 
-      // Combine existing + new files (remove duplicates)
       const allFileIds = [...new Set([...existingFileIds, ...fileIds])];
       
-      // Create new knowledge base with all resources
       const kb = await stackAIClient.createKnowledgeBase({
         connection_id: connectionId,
         connection_source_ids: allFileIds,
@@ -342,7 +282,6 @@ export function useBulkIndexFiles() {
       knowledgeBaseId = kb.knowledge_base_id;
       stackAIClient.setKnowledgeBaseId(knowledgeBaseId);
       
-      // Sync the knowledge base to start indexing
       await stackAIClient.syncKnowledgeBase(knowledgeBaseId);
 
       return { 
@@ -353,17 +292,12 @@ export function useBulkIndexFiles() {
       };
     },
     onSuccess: () => {
-      // Invalidate and refetch all relevant queries
       queryClient.invalidateQueries({ queryKey: ['files-ui'] });
       queryClient.invalidateQueries({ queryKey: ['indexed-files'] });
       queryClient.invalidateQueries({ queryKey: stackAIKeys.knowledgeBases() });
       
-      // Force immediate refetch to update UI
       queryClient.refetchQueries({ queryKey: ['files-ui'] });
       queryClient.refetchQueries({ queryKey: ['indexed-files'] });
-    },
-    onError: (error) => {
-      // Error is handled by mutation error state
     },
   });
 }
@@ -377,20 +311,15 @@ export function useBulkDeIndexFiles() {
       if (!kbId) throw new Error('No knowledge base selected');
 
 
-      // Get current resources
       const currentKbResources = await stackAIClient.listKnowledgeBaseResources(kbId);
       const existingFileIds = currentKbResources.data.map(r => r.resource_id);
       
-      // Remove the specified files from the list
       const remainingFileIds = existingFileIds.filter(id => !fileIds.includes(id));
 
       if (remainingFileIds.length === 0) {
-        // If no files left, we could delete the KB or leave it empty
-        // No resources left, keeping empty KB
         return { success: true, removedFileIds: fileIds };
       }
 
-      // Create new KB with remaining files
       const connectionId = stackAIClient.getConnectionId();
       if (!connectionId) {
         throw new Error('No connection available');
@@ -416,7 +345,6 @@ export function useBulkDeIndexFiles() {
       const newKbId = kb.knowledge_base_id;
       stackAIClient.setKnowledgeBaseId(newKbId);
       
-      // Sync the updated knowledge base
       await stackAIClient.syncKnowledgeBase(newKbId);
 
       return { success: true, removedFileIds: fileIds };
@@ -426,12 +354,8 @@ export function useBulkDeIndexFiles() {
       queryClient.invalidateQueries({ queryKey: ['indexed-files'] });
       queryClient.invalidateQueries({ queryKey: stackAIKeys.knowledgeBases() });
       
-      // Force immediate refetch to update UI
       queryClient.refetchQueries({ queryKey: ['files-ui'] });
       queryClient.refetchQueries({ queryKey: ['indexed-files'] });
-    },
-    onError: (error) => {
-      // Error is handled by mutation error state
     },
   });
 }

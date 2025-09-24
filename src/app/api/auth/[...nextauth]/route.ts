@@ -17,33 +17,27 @@ export const authOptions: NextAuthOptions = {
         }
 
         try {
-          // Authenticate with Stack AI
           await stackAIClient.authenticate({
             email: credentials.email,
             password: credentials.password
           })
           
-          // Get organization ID (already set during authentication)
           const orgId = stackAIClient.getCurrentOrgId()
           
-          // Get connections
           const connections = await stackAIClient.getConnections()
           const connectionId = connections.length > 0 ? connections[0].connection_id : undefined
 
-          // Get auth token to store in session
           const authToken = stackAIClient.getAuthToken()
 
           return {
             id: credentials.email,
             email: credentials.email,
             name: credentials.email,
-            // Store Stack AI specific data
             orgId,
             connectionId,
             authToken,
           }
         } catch (error) {
-          // Authentication failed
           return null
         }
       }
@@ -51,7 +45,6 @@ export const authOptions: NextAuthOptions = {
   ],
   callbacks: {
     async jwt({ token, user }) {
-      // Persist Stack AI data in the token
       if (user) {
         token.orgId = user.orgId
         token.connectionId = user.connectionId
@@ -60,7 +53,6 @@ export const authOptions: NextAuthOptions = {
       return token
     },
     async session({ session, token }) {
-      // Send properties to the client
       return {
         ...session,
         user: {

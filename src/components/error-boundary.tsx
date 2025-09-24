@@ -26,10 +26,10 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    // Log error to monitoring service in production
+    
     if (process.env.NODE_ENV === 'production') {
-      // Log to your error monitoring service here
-      // Example: Sentry.captureException(error, { extra: errorInfo });
+      
+      
     } else {
       console.error('Error caught by boundary:', error, errorInfo);
     }
@@ -71,7 +71,7 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 }
 
-// Hook for using error boundary in functional components
+
 export function withErrorBoundary<P extends object>(
   Component: React.ComponentType<P>,
   fallback?: ReactNode

@@ -54,10 +54,10 @@ export function KnowledgeBaseManager({ selectedResourceIds, onKnowledgeBaseReady
         },
       });
 
-      // Set the knowledge base ID in the client
+      
       stackAIClient.setKnowledgeBaseId(kb.knowledge_base_id);
 
-      // Trigger sync
+      
       await syncKBMutation.mutateAsync(kb.knowledge_base_id);
 
       onKnowledgeBaseReady();

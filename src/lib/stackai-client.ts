@@ -12,11 +12,10 @@ import {
 } from '@/types/api';
 import { env } from '@/lib/env';
 
-const SUPABASE_AUTH_URL = 'https://sb.stack-ai.com';
+const SUPABASE_AUTH_URL = 'https:
 const ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZic3VhZGZxaGtseG9rbWxodHNkIiwicm9sZSI6ImFub24iLCJpYXQiOjE2NzM0NTg5ODAsImV4cCI6MTk4OTAzNDk4MH0.Xjry9m7oc42_MsLRc1bZhTTzip3srDjJ6fJMkwhXQ9s';
 const BACKEND_URL = env.NEXT_PUBLIC_STACK_AI_API_URL;
 
-// localStorage keys
 const STORAGE_KEYS = {
   AUTH_TOKEN: 'stackai_auth_token',
   ORG_ID: 'stackai_org_id',
@@ -31,12 +30,11 @@ class StackAIClient {
   private knowledgeBaseId?: string;
 
   constructor() {
-    // Load persisted state from localStorage on initialization
     this.loadPersistedState();
   }
 
   private loadPersistedState(): void {
-    if (typeof window === 'undefined') return; // Skip on server-side
+    if (typeof window === 'undefined') return;
 
     this.authToken = localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN) || undefined;
     this.orgId = localStorage.getItem(STORAGE_KEYS.ORG_ID) || undefined;
@@ -45,7 +43,7 @@ class StackAIClient {
   }
 
   private persistState(): void {
-    if (typeof window === 'undefined') return; // Skip on server-side
+    if (typeof window === 'undefined') return;
 
     if (this.authToken) {
       localStorage.setItem(STORAGE_KEYS.AUTH_TOKEN, this.authToken);
@@ -72,7 +70,6 @@ class StackAIClient {
     }
   }
 
-  // Authentication
   async authenticate(credentials: StackAIAuthRequest): Promise<void> {
     const requestUrl = `${SUPABASE_AUTH_URL}/auth/v1/token?grant_type=password`;
     
@@ -97,10 +94,8 @@ class StackAIClient {
       const data = await response.json();
       this.authToken = data.access_token;
 
-      // Get organization ID
       await this.getOrgId();
       
-      // Persist authentication state
       this.persistState();
     } catch (error) {
       throw this.handleError(error);
@@ -126,14 +121,12 @@ class StackAIClient {
       const data = await response.json();
       this.orgId = data.org_id;
       
-      // Persist state after getting org ID
       this.persistState();
     } catch (error) {
       throw this.handleError(error);
     }
   }
 
-  // Connection management
   async getConnections(): Promise<StackAIConnection[]> {
     if (!this.authToken) {
       throw new Error('Not authenticated');
@@ -152,10 +145,8 @@ class StackAIClient {
 
       const connections = await response.json();
       
-      // Set the first connection as default
       if (connections.length > 0) {
         this.connectionId = connections[0].connection_id;
-        // Persist the connection ID
         this.persistState();
       }
 
@@ -165,7 +156,6 @@ class StackAIClient {
     }
   }
 
-  // Resource management
   async listResources(params: StackAIListResourcesRequest = {}): Promise<StackAIResourcesResponse> {
     if (!this.authToken || !this.connectionId) {
       throw new Error('Not authenticated or no connection selected');
@@ -202,17 +192,11 @@ class StackAIClient {
     }
   }
 
-  // Knowledge base management
   async createKnowledgeBase(params: StackAIKnowledgeBaseCreateRequest): Promise<StackAIKnowledgeBase> {
     if (!this.authToken) {
       throw new Error('Not authenticated');
     }
 
-    console.log('📝 createKnowledgeBase - Creating KB with params:', {
-      connection_id: params.connection_id,
-      connection_source_ids: params.connection_source_ids,
-      source_count: params.connection_source_ids.length
-    });
 
     try {
       const response = await fetch(`${BACKEND_URL}/knowledge_bases`, {
@@ -246,10 +230,6 @@ class StackAIClient {
       throw new Error('No knowledge base ID provided');
     }
 
-    console.log('📝 syncKnowledgeBase - Syncing KB:', {
-      knowledgeBaseId: kbId,
-      orgId: this.orgId
-    });
 
     try {
       const response = await fetch(`${BACKEND_URL}/knowledge_bases/sync/trigger/${kbId}/${this.orgId}`, {
@@ -315,7 +295,6 @@ class StackAIClient {
     }
   }
 
-  // Utility methods for compatibility with existing UI
   convertStackAIResourceToDriveItem(resource: StackAIResource, indexedResourceIds: string[] = []): DriveItem {
     const pathParts = resource.inode_path.path.split('/');
     const name = pathParts[pathParts.length - 1] || resource.inode_path.path;
@@ -333,37 +312,25 @@ class StackAIClient {
   }
 
   async getFilesForUI(params: { folderId?: string; nameFilter?: string } = {}): Promise<ListFilesResponse> {
-    console.log('📝 getFilesForUI - Called with params:', params);
-    console.log('📝 getFilesForUI - Client state:', {
-      isAuthenticated: this.isAuthenticated(),
-      hasConnection: !!this.connectionId,
-      hasOrgId: !!this.orgId
-    });
-    
     try {
-      console.log('📝 getFilesForUI - Calling listResources...');
       const stackAIResponse = await this.listResources({
         resource_id: params.folderId,
       });
-      console.log('📝 getFilesForUI - Got response with', stackAIResponse.data.length, 'resources');
 
       let resources = stackAIResponse.data;
 
-      // Apply name filter if provided
       if (params.nameFilter) {
         resources = resources.filter(resource => 
           resource.inode_path.path.toLowerCase().includes(params.nameFilter!.toLowerCase())
         );
       }
 
-      // Get indexed resource IDs if we have a knowledge base
       let indexedResourceIds: string[] = [];
       if (this.knowledgeBaseId) {
         try {
           const kbResponse = await this.listKnowledgeBaseResources(this.knowledgeBaseId);
           indexedResourceIds = kbResponse.data.map(r => r.resource_id);
         } catch (error) {
-          // Failed to get indexed resources - KB might not exist yet
         }
       }
 
@@ -381,7 +348,6 @@ class StackAIClient {
     }
   }
 
-  // Setters for external configuration
   setConnectionId(connectionId: string): void {
     this.connectionId = connectionId;
     this.persistState();
@@ -402,7 +368,6 @@ class StackAIClient {
     this.persistState();
   }
 
-  // Getters
   getCurrentOrgId(): string | undefined {
     return this.orgId;
   }
@@ -429,7 +394,6 @@ class StackAIClient {
     this.connectionId = undefined;
     this.knowledgeBaseId = undefined;
     
-    // Clear persisted state
     this.persistState();
   }
 
@@ -449,8 +413,6 @@ class StackAIClient {
   }
 }
 
-// Export singleton instance
 export const stackAIClient = new StackAIClient();
 
-// Export class for testing or custom configurations
 export { StackAIClient };

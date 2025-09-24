@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-// Mock indexed files data - in a real app, this would be in a database
+
 const indexedFiles = new Set(['3', '5']);
 
 export async function POST(request: NextRequest) {
@@ -14,13 +14,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Simulate indexing process
-    // Indexing file to knowledge base
     
-    // Add some processing time
+    
+    
+    
     await new Promise(resolve => setTimeout(resolve, 1000));
 
-    // Add to indexed files
+    
     indexedFiles.add(fileId);
 
     return NextResponse.json({

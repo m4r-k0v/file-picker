@@ -46,7 +46,6 @@ export function SelectionFooter({
           )}
         </div>
         <div className="flex gap-2">
-          {/* Bulk Index Button */}
           {selectedNotIndexedCount > 0 && onBulkIndex && (
             <Button 
               variant="outline"
@@ -68,7 +67,6 @@ export function SelectionFooter({
             </Button>
           )}
 
-          {/* Bulk De-Index Button */}
           {selectedIndexedCount > 0 && onBulkDeIndex && (
             <Button 
               variant="outline"
