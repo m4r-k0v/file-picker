@@ -12,7 +12,7 @@ import {
 } from '@/types/api';
 import { env } from '@/lib/env';
 
-const SUPABASE_AUTH_URL = 'https:
+const SUPABASE_AUTH_URL = 'https://sb.stack-ai.com';
 const ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZic3VhZGZxaGtseG9rbWxodHNkIiwicm9sZSI6ImFub24iLCJpYXQiOjE2NzM0NTg5ODAsImV4cCI6MTk4OTAzNDk4MH0.Xjry9m7oc42_MsLRc1bZhTTzip3srDjJ6fJMkwhXQ9s';
 const BACKEND_URL = env.NEXT_PUBLIC_STACK_AI_API_URL;
 

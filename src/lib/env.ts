@@ -3,7 +3,7 @@ import { z } from 'zod';
 
 const envSchema = z.object({
   
-  NEXT_PUBLIC_STACK_AI_API_URL: z.string().url().optional().default('https:
+  NEXT_PUBLIC_STACK_AI_API_URL: z.string().url().optional().default('https://api.stack-ai.com'),
   NEXT_PUBLIC_APP_URL: z.string().url().optional(),
 
   

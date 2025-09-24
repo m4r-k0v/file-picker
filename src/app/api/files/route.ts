@@ -9,7 +9,7 @@ const mockFiles: DriveItem[] = [
     type: 'folder',
     createdTime: '2024-01-15T10:30:00Z',
     modifiedTime: '2024-01-20T14:45:00Z',
-    webViewLink: 'https:
+    webViewLink: 'https://drive.google.com/file/d/',
   },
   {
     id: '2',
@@ -17,7 +17,7 @@ const mockFiles: DriveItem[] = [
     type: 'folder',
     createdTime: '2024-01-10T09:15:00Z',
     modifiedTime: '2024-01-18T16:20:00Z',
-    webViewLink: 'https:
+    webViewLink: 'https://drive.google.com/file/d/',
   },
   {
     id: '3',
@@ -27,7 +27,7 @@ const mockFiles: DriveItem[] = [
     size: 2547832,
     createdTime: '2024-01-12T11:20:00Z',
     modifiedTime: '2024-01-12T11:20:00Z',
-    webViewLink: 'https:
+    webViewLink: 'https://drive.google.com/file/d/',
   },
   {
     id: '4',
@@ -37,7 +37,7 @@ const mockFiles: DriveItem[] = [
     size: 45678,
     createdTime: '2024-01-14T15:30:00Z',
     modifiedTime: '2024-01-16T09:45:00Z',
-    webViewLink: 'https:
+    webViewLink: 'https://drive.google.com/file/d/',
   },
   {
     id: '5',
@@ -47,7 +47,7 @@ const mockFiles: DriveItem[] = [
     size: 123456,
     createdTime: '2024-01-08T13:15:00Z',
     modifiedTime: '2024-01-19T10:30:00Z',
-    webViewLink: 'https:
+    webViewLink: 'https://drive.google.com/file/d/',
   },
   {
     id: '6',
@@ -57,7 +57,7 @@ const mockFiles: DriveItem[] = [
     size: 8765432,
     createdTime: '2024-01-11T16:45:00Z',
     modifiedTime: '2024-01-17T12:20:00Z',
-    webViewLink: 'https:
+    webViewLink: 'https://drive.google.com/file/d/',
   },
 ];
 
@@ -73,7 +73,7 @@ const folderContents: Record<string, DriveItem[]> = {
       createdTime: '2024-01-13T14:20:00Z',
       modifiedTime: '2024-01-13T14:20:00Z',
       parentId: '1',
-      webViewLink: 'https:
+      webViewLink: 'https://drive.google.com/file/d/',
     },
     {
       id: '8',
@@ -84,7 +84,7 @@ const folderContents: Record<string, DriveItem[]> = {
       createdTime: '2024-01-15T11:30:00Z',
       modifiedTime: '2024-01-15T11:30:00Z',
       parentId: '1',
-      webViewLink: 'https:
+      webViewLink: 'https://drive.google.com/file/d/',
     },
   ],
   '2': [ 
@@ -97,7 +97,7 @@ const folderContents: Record<string, DriveItem[]> = {
       createdTime: '2024-01-09T10:15:00Z',
       modifiedTime: '2024-01-09T10:15:00Z',
       parentId: '2',
-      webViewLink: 'https:
+      webViewLink: 'https://drive.google.com/file/d/',
     },
     {
       id: '10',
@@ -108,7 +108,7 @@ const folderContents: Record<string, DriveItem[]> = {
       createdTime: '2024-01-11T15:45:00Z',
       modifiedTime: '2024-01-11T15:45:00Z',
       parentId: '2',
-      webViewLink: 'https:
+      webViewLink: 'https://drive.google.com/file/d/',
     },
   ],
 };
