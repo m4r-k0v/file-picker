@@ -26,6 +26,7 @@ export function FileIcon({ item, className = "w-5 h-5" }: FileIconProps) {
   const fileName = item.name.toLowerCase();
 
   if (mimeType.includes('image/') || /\.(jpg|jpeg|png|gif|bmp|svg|webp)$/.test(fileName)) {
+    {/* eslint-disable-next-line jsx-a11y/alt-text */}
     return <Image className={className} />;
   }
 

@@ -1,7 +1,7 @@
 'use client';
 
 import { LoginForm } from "@/components/auth/login-form";
-import { useAuth, useAuthRedirect } from "@/hooks/use-auth";
+import { useAuth, useAuthRedirect } from "@/hooks/use-nextauth";
 
 export default function Home() {
   const { isAuthenticated } = useAuth();

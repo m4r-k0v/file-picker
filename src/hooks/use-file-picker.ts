@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useMemo, useEffect, useCallback, useRef } from 'react';
-import { useFiles, useIndexedFiles } from '@/hooks/use-stackai-files';
+import { useFiles, useIndexedFiles, useBulkIndexFiles, useBulkDeIndexFiles } from '@/hooks/use-stackai-files';
 import { SortField, SortDirection, FilterConfig, DriveItem } from '@/types/api';
 
 export type BreadcrumbItem = {
@@ -38,7 +38,10 @@ export function useFilePicker({ onResourceSelection }: UseFilePickerProps = {}) 
 
   const { data: indexedData = { resourceIds: [], indexedFolders: [] } } = useIndexedFiles();
   const indexedFileIds = useMemo(() => indexedData.resourceIds || [], [indexedData.resourceIds]);
-  const indexedFolders = useMemo(() => indexedData.indexedFolders || [], [indexedData.indexedFolders]);
+
+  // Bulk operations
+  const bulkIndexMutation = useBulkIndexFiles();
+  const bulkDeIndexMutation = useBulkDeIndexFiles();
 
   // Helper function to check if an item is indexed (directly or through parent folder)
   const isItemIndexed = useCallback((item: DriveItem) => {
@@ -165,19 +168,49 @@ export function useFilePicker({ onResourceSelection }: UseFilePickerProps = {}) 
     setSortDirection(direction);
   }, []);
 
-  // Notify parent component about selected resources
-  // Use useCallback to memoize the notification function
-  const notifyResourceSelection = useCallback((selectedIds: string[]) => {
-    if (onResourceSelectionRef.current) {
-      onResourceSelectionRef.current(selectedIds);
+  // Calculate selection statistics
+  const selectedFilesArray = useMemo(() => Array.from(selectedFiles), [selectedFiles]);
+  const selectedItems = useMemo(() => {
+    if (!filesData?.files) return [];
+    return filesData.files.filter(item => selectedFiles.has(item.id));
+  }, [filesData?.files, selectedFiles]);
+
+  const selectedIndexedCount = useMemo(() => {
+    return selectedItems.filter(item => isItemIndexed(item)).length;
+  }, [selectedItems, isItemIndexed]);
+
+  const selectedNotIndexedCount = useMemo(() => {
+    return selectedItems.filter(item => !isItemIndexed(item)).length;
+  }, [selectedItems, isItemIndexed]);
+
+  // Bulk action handlers
+  const handleBulkIndex = useCallback((fileIds: string[]) => {
+    const notIndexedIds = fileIds.filter(id => {
+      const item = filesData?.files?.find(f => f.id === id);
+      return item && !isItemIndexed(item);
+    });
+    if (notIndexedIds.length > 0) {
+      bulkIndexMutation.mutate({ fileIds: notIndexedIds });
     }
-  }, []);
+  }, [filesData?.files, isItemIndexed, bulkIndexMutation]);
+
+  const handleBulkDeIndex = useCallback((fileIds: string[]) => {
+    const indexedIds = fileIds.filter(id => {
+      const item = filesData?.files?.find(f => f.id === id);
+      return item && isItemIndexed(item);
+    });
+    if (indexedIds.length > 0) {
+      bulkDeIndexMutation.mutate({ fileIds: indexedIds });
+    }
+  }, [filesData?.files, isItemIndexed, bulkDeIndexMutation]);
 
   // Only trigger when selectedFiles actually changes
   useEffect(() => {
     const selectedIds = Array.from(selectedFiles);
-    notifyResourceSelection(selectedIds);
-  }, [selectedFiles, notifyResourceSelection]);
+    if (onResourceSelectionRef.current) {
+      onResourceSelectionRef.current(selectedIds);
+    }
+  }, [selectedFiles]); // Remove notifyResourceSelection from dependencies
 
   return {
     // State
@@ -196,6 +229,11 @@ export function useFilePicker({ onResourceSelection }: UseFilePickerProps = {}) 
     isLoading,
     error,
     
+    // Selection statistics
+    selectedFilesArray,
+    selectedIndexedCount,
+    selectedNotIndexedCount,
+    
     // Actions
     handleNavigate,
     handleBreadcrumbNavigate,
@@ -205,5 +243,11 @@ export function useFilePicker({ onResourceSelection }: UseFilePickerProps = {}) 
     setSearchQuery,
     setFilters,
     refetch,
+    
+    // Bulk actions
+    handleBulkIndex,
+    handleBulkDeIndex,
+    isBulkIndexing: bulkIndexMutation.isPending,
+    isBulkDeIndexing: bulkDeIndexMutation.isPending,
   };
 }

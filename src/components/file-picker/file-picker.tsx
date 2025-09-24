@@ -4,8 +4,8 @@ import { useFilePicker } from '@/hooks/use-file-picker';
 import { FilePickerHeader } from './file-picker-header';
 import { Toolbar } from './toolbar';
 import { FileList } from './file-list';
+import { FileListVirtualized } from './file-list-virtualized';
 import { SelectionFooter } from './selection-footer';
-import { ErrorState } from './error-state';
 
 type FilePickerProps = {
   onResourceSelection?: (resourceIds: string[]) => void;
@@ -29,10 +29,13 @@ export function FilePicker({
 
     // Data
     filteredFiles,
-    indexedFileIds,
     isItemIndexed,
     isLoading,
-    error,
+
+    // Selection statistics
+    selectedFilesArray,
+    selectedIndexedCount,
+    selectedNotIndexedCount,
 
     // Actions
     handleNavigate,
@@ -42,12 +45,14 @@ export function FilePicker({
     handleSortChange,
     setSearchQuery,
     setFilters,
-    refetch,
+
+    // Bulk actions
+    handleBulkIndex,
+    handleBulkDeIndex,
+    isBulkIndexing,
+    isBulkDeIndexing,
   } = useFilePicker({ onResourceSelection });
 
-  // if (error) {
-  //   return <ErrorState onRetry={refetch} />;
-  // }
 
   return (
     <div className="border border-gray-200 rounded-lg bg-white shadow-sm">
@@ -67,22 +72,41 @@ export function FilePicker({
       />
 
       <div className="min-h-96">
-        <FileList
-          files={filteredFiles}
-          isLoading={isLoading}
-          searchQuery={searchQuery}
-          selectedFiles={selectedFiles}
-          isItemIndexed={isItemIndexed}
-          onFileSelect={handleFileSelect}
-          onNavigate={handleNavigate}
-        />
+        {filteredFiles.length > 50 ? (
+          <FileListVirtualized
+            files={filteredFiles}
+            isLoading={isLoading}
+            searchQuery={searchQuery}
+            selectedFiles={selectedFiles}
+            isItemIndexed={isItemIndexed}
+            onFileSelect={handleFileSelect}
+            onNavigate={handleNavigate}
+          />
+        ) : (
+          <FileList
+            files={filteredFiles}
+            isLoading={isLoading}
+            searchQuery={searchQuery}
+            selectedFiles={selectedFiles}
+            isItemIndexed={isItemIndexed}
+            onFileSelect={handleFileSelect}
+            onNavigate={handleNavigate}
+          />
+        )}
       </div>
 
       <SelectionFooter
         selectedCount={selectedFiles.size}
+        selectedFiles={selectedFilesArray}
+        selectedIndexedCount={selectedIndexedCount}
+        selectedNotIndexedCount={selectedNotIndexedCount}
         showKnowledgeBaseButton={showKnowledgeBaseButton}
         onClearSelection={clearSelection}
         onShowKnowledgeBaseManager={onShowKnowledgeBaseManager}
+        onBulkIndex={handleBulkIndex}
+        onBulkDeIndex={handleBulkDeIndex}
+        isBulkIndexing={isBulkIndexing}
+        isBulkDeIndexing={isBulkDeIndexing}
       />
     </div>
   );

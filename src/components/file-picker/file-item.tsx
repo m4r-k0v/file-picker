@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, memo } from 'react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { FileIcon } from './file-icon';
 import { FileInfo } from './file-info';
@@ -13,8 +13,10 @@ type FileItemProps = {
   isIndexed: boolean;
 }
 
-export function FileItem({
+export const FileItem = memo(function FileItem({
   item,
+  isSelected,
+  onSelect,
   onNavigate,
   isIndexed,
 }: FileItemProps) {
@@ -33,6 +35,12 @@ export function FileItem({
 
   return (
     <div className={`flex items-center gap-3 p-3 hover:bg-blue-50 group transition-opacity ${isLoading ? 'opacity-50' : ''}`}>
+      <Checkbox
+        checked={isSelected}
+        onCheckedChange={(checked) => onSelect(!!checked)}
+        disabled={isLoading}
+      />
+      
       <FileIcon item={item} className="w-6 h-6 text-muted-foreground" />
 
       <FileInfo
@@ -48,4 +56,13 @@ export function FileItem({
       />
     </div>
   );
-}
+}, (prevProps, nextProps) => {
+  // Custom comparison function for memo
+  return (
+    prevProps.item.id === nextProps.item.id &&
+    prevProps.isSelected === nextProps.isSelected &&
+    prevProps.isIndexed === nextProps.isIndexed &&
+    prevProps.onNavigate === nextProps.onNavigate &&
+    prevProps.onSelect === nextProps.onSelect
+  );
+});

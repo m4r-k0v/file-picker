@@ -7,7 +7,7 @@ export async function DELETE(
   const { fileId } = await params;
 
   // Simulate deletion (in real implementation, this would remove from Google Drive listing)
-  console.log(`Removing file ${fileId} from listing`);
+  // Removing file from listing
 
   // Simulate some processing time
   await new Promise(resolve => setTimeout(resolve, 500));

@@ -15,7 +15,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Simulate indexing process
-    console.log(`Indexing file ${fileId} to knowledge base ${knowledgeBaseId || 'default'}`);
+    // Indexing file to knowledge base
     
     // Add some processing time
     await new Promise(resolve => setTimeout(resolve, 1000));
@@ -28,7 +28,6 @@ export async function POST(request: NextRequest) {
       indexedAt: new Date().toISOString(),
     });
   } catch (error) {
-    console.error('Error indexing file:', error);
     return NextResponse.json(
       { error: 'Failed to index file' },
       { status: 500 }

@@ -15,7 +15,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Simulate de-indexing process
-    console.log(`De-indexing file ${fileId} from knowledge base ${knowledgeBaseId || 'default'}`);
+    // De-indexing file from knowledge base
     
     // Add some processing time
     await new Promise(resolve => setTimeout(resolve, 500));
@@ -25,7 +25,6 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Error de-indexing file:', error);
     return NextResponse.json(
       { error: 'Failed to de-index file' },
       { status: 500 }

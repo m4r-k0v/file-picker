@@ -32,6 +32,14 @@ export function FileActions({ item, isIndexed, onLoadingStateChange }: FileActio
   };
 
   const handleIndex = () => {
+    console.log('📝 FileActions - handleIndex called for:', {
+      id: item.id,
+      name: item.name,
+      type: item.type,
+      isIndexed,
+      action: isIndexed ? 'de-index' : 'index'
+    });
+    
     if (isIndexed) {
       deIndexFileMutation.mutate({ fileId: item.id });
     } else {

@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { LoginFormFields } from './login-form-fields';
-import { useAuth } from '@/hooks/use-auth';
+import { useAuth } from '@/hooks/use-nextauth';
 
 type LoginFormProps = {
   onLoginSuccess?: () => void;
@@ -12,12 +12,23 @@ type LoginFormProps = {
 export function LoginForm({ onLoginSuccess }: LoginFormProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const { login, isLoggingIn, loginError } = useAuth();
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const { login } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    login({ email, password });
-    onLoginSuccess?.();
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      await login(email, password);
+      onLoginSuccess?.();
+    } catch (error) {
+      setError(error instanceof Error ? error.message : 'Authentication failed');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -36,8 +47,8 @@ export function LoginForm({ onLoginSuccess }: LoginFormProps) {
             onEmailChange={setEmail}
             onPasswordChange={setPassword}
             onSubmit={handleSubmit}
-            isLoading={isLoggingIn}
-            error={loginError}
+            isLoading={isLoading}
+            error={error ? new Error(error) : null}
           />
 
           <div className="mt-4 text-sm text-muted-foreground text-center">

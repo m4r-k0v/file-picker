@@ -10,10 +10,11 @@ import {
   DriveItem,
   ListFilesResponse,
 } from '@/types/api';
+import { env } from '@/lib/env';
 
 const SUPABASE_AUTH_URL = 'https://sb.stack-ai.com';
 const ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZic3VhZGZxaGtseG9rbWxodHNkIiwicm9sZSI6ImFub24iLCJpYXQiOjE2NzM0NTg5ODAsImV4cCI6MTk4OTAzNDk4MH0.Xjry9m7oc42_MsLRc1bZhTTzip3srDjJ6fJMkwhXQ9s';
-const BACKEND_URL = process.env.NEXT_PUBLIC_STACK_AI_API_URL || 'https://api.stack-ai.com';
+const BACKEND_URL = env.NEXT_PUBLIC_STACK_AI_API_URL;
 
 // localStorage keys
 const STORAGE_KEYS = {
@@ -207,6 +208,12 @@ class StackAIClient {
       throw new Error('Not authenticated');
     }
 
+    console.log('📝 createKnowledgeBase - Creating KB with params:', {
+      connection_id: params.connection_id,
+      connection_source_ids: params.connection_source_ids,
+      source_count: params.connection_source_ids.length
+    });
+
     try {
       const response = await fetch(`${BACKEND_URL}/knowledge_bases`, {
         method: 'POST',
@@ -238,6 +245,11 @@ class StackAIClient {
     if (!kbId) {
       throw new Error('No knowledge base ID provided');
     }
+
+    console.log('📝 syncKnowledgeBase - Syncing KB:', {
+      knowledgeBaseId: kbId,
+      orgId: this.orgId
+    });
 
     try {
       const response = await fetch(`${BACKEND_URL}/knowledge_bases/sync/trigger/${kbId}/${this.orgId}`, {
@@ -321,10 +333,19 @@ class StackAIClient {
   }
 
   async getFilesForUI(params: { folderId?: string; nameFilter?: string } = {}): Promise<ListFilesResponse> {
+    console.log('📝 getFilesForUI - Called with params:', params);
+    console.log('📝 getFilesForUI - Client state:', {
+      isAuthenticated: this.isAuthenticated(),
+      hasConnection: !!this.connectionId,
+      hasOrgId: !!this.orgId
+    });
+    
     try {
+      console.log('📝 getFilesForUI - Calling listResources...');
       const stackAIResponse = await this.listResources({
         resource_id: params.folderId,
       });
+      console.log('📝 getFilesForUI - Got response with', stackAIResponse.data.length, 'resources');
 
       let resources = stackAIResponse.data;
 
@@ -342,7 +363,7 @@ class StackAIClient {
           const kbResponse = await this.listKnowledgeBaseResources(this.knowledgeBaseId);
           indexedResourceIds = kbResponse.data.map(r => r.resource_id);
         } catch (error) {
-          console.warn('Failed to get indexed resources:', error);
+          // Failed to get indexed resources - KB might not exist yet
         }
       }
 
@@ -371,13 +392,31 @@ class StackAIClient {
     this.persistState();
   }
 
+  setAuthToken(authToken: string): void {
+    this.authToken = authToken;
+    this.persistState();
+  }
+
+  setOrgId(orgId: string): void {
+    this.orgId = orgId;
+    this.persistState();
+  }
+
   // Getters
+  getCurrentOrgId(): string | undefined {
+    return this.orgId;
+  }
+
   getConnectionId(): string | undefined {
     return this.connectionId;
   }
 
   getKnowledgeBaseId(): string | undefined {
     return this.knowledgeBaseId;
+  }
+
+  getAuthToken(): string | undefined {
+    return this.authToken;
   }
 
   isAuthenticated(): boolean {

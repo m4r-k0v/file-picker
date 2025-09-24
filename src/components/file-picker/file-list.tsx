@@ -1,7 +1,8 @@
 'use client';
 
-import { Loader2, FolderOpen } from 'lucide-react';
+import { FolderOpen } from 'lucide-react';
 import { FileItem } from './file-item';
+import { FileListSkeleton } from './file-list-skeleton';
 import { DriveItem } from '@/types/api';
 
 type FileListProps = {
@@ -24,12 +25,7 @@ export function FileList({
   onNavigate,
 }: FileListProps) {
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <Loader2 className="w-8 h-8 animate-spin" />
-        <span className="ml-2">Loading files...</span>
-      </div>
-    );
+    return <FileListSkeleton />;
   }
 
   if (files.length === 0) {

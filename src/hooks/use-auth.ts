@@ -65,7 +65,7 @@ export function useAuth() {
       router.push('/dashboard');
     },
     onError: (error) => {
-      console.error('Login failed:', error);
+      // Login error is handled by mutation error state
     },
   });
 
@@ -110,13 +110,11 @@ export function useAuthRedirect(redirectTo: 'dashboard' | 'login' = 'login') {
   const { isAuthenticated } = useAuth();
   const router = useRouter();
 
-// console.count('dasda')
-//
-//   useEffect(() => {
-//     if (redirectTo === 'dashboard' && isAuthenticated) {
-//       router.push('/dashboard');
-//     } else if (redirectTo === 'login' && !isAuthenticated) {
-//       router.push('/');
-//     }
-//   }, [redirectTo, isAuthenticated]);
+  useEffect(() => {
+    if (redirectTo === 'dashboard' && isAuthenticated) {
+      router.push('/dashboard');
+    } else if (redirectTo === 'login' && !isAuthenticated) {
+      router.push('/');
+    }
+  }, [redirectTo, isAuthenticated, router]);
 }
